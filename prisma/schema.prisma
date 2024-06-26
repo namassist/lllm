@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String @id @default(uuid())
+  username  String @db.VarChar(100) @unique
+  email     String @db.VarChar(100) @unique
+  image    String
+  password  String @db.VarChar(100)
+  userRoles UserRole[]
+  students   Student?
+  instructors Instructor?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("users")
+}
+
+model Role {
+  id    String @id @default(uuid())
+  name  String @db.VarChar(100) @unique
+  userRoles UserRole[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("roles")
+}
+
+model UserRole {
+  user_id String @db.VarChar(100) @unique
+  user   Users @relation(fields: [user_id], references: [id])
+
+  role_id String @db.VarChar(100) @unique
+  role   Role @relation(fields: [role_id], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@id([user_id, role_id])
+  @@map("user_roles")
+}
+
+model Student {
+  id        String @id @default(uuid())
+  fullname  String @db.VarChar(200)
+  address   String @db.VarChar(200)
+  phone     String @db.VarChar(200) 
+  gender    Gender
+
+  user_id   String @db.VarChar(100) @unique
+  user      Users   @relation(fields: [user_id], references: [id])
+
+  examAttempt ExamAttempt[]
+  discussion Discussion[]
+  reply Reply[]
+  enrollmentCourse EnrollmentCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("students")
+}
+
+enum Gender {
+  male
+  female
+}
+
+model Instructor {
+  id        String @id @default(uuid())
+  fullname  String @db.VarChar(200)
+  address   String @db.VarChar(200) @unique
+  phone     String @db.VarChar(200)
+  gender    Gender
+
+  user_id   String @db.VarChar(100) @unique
+  user      Users   @relation(fields: [user_id], references: [id])
+
+  course Course[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("instructors")
+}
+
+model Course {
+  id  String @id @default(uuid())
+  title String
+  description String
+  image String?
+  key String @db.VarChar(100)
+  isPublished Boolean @default(false)
+
+  instructor_id String
+  instructor Instructor @relation(fields: [instructor_id], references: [id])
+
+  category_id String?
+  topics Topics[]
+  exam Exam[]
+  discussion Discussion[]
+  enrollmentCourse EnrollmentCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("courses")
+}
+
+model EnrollmentCourse {
+  id  String @id @default(uuid())
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  student_id String
+  student Student @relation(fields: [student_id], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("enrollment_courses")
+}
+
+model Topics {
+  id String @id @default(uuid())
+  title String @db.Text
+  description String @db.Text
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("topics")
+}
+
+model Exam {
+  id String @id @default(uuid())
+  name String @db.Text
+  description String @db.Text
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  duration Int
+  held_at DateTime
+
+  question Question[]
+  examAttempt ExamAttempt[]
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("exams")
+}
+
+model Question {
+  id String @id @default(uuid())
+  question String @db.Text
+
+  exam_id String
+  exam Exam @relation(fields: [exam_id], references: [id])
+
+  score Int
+  image String? @db.Text
+  choice Choice[]
+  essayAnswer EssayAnswer[]
+  multiplechoiceAnswer MultipleChoiceAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("questions")
+}
+
+model Choice {
+  id String @id @default(uuid())
+  choice String @db.Text
+
+  question_id String
+  question Question @relation(fields: [question_id], references: [id])
+
+  is_correct Boolean
+  image String? @db.Text
+  multiplechoiceAnswer MultipleChoiceAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("choices")
+}
+
+model ExamAttempt {
+  id String @id @default(uuid())
+  
+  exam_id String
+  exam Exam @relation(fields: [exam_id], references: [id])
+
+  student_id String
+  student Student @relation(fields: [student_id], references: [id])
+
+  start_at DateTime
+  finished_at DateTime
+  score Int
+  feedback String @db.Text
+  essayAnswer EssayAnswer[]
+  multiplechoiceAnswer MultipleChoiceAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("exam_attempts")
+}
+
+model EssayAnswer {
+  id String @id @default(uuid())
+
+  attempt_id String
+  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id])
+
+  question_id String
+  question Question @relation(fields: [question_id], references: [id])
+
+  answer String @db.Text
+  score Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("essay_answers")
+}
+
+model MultipleChoiceAnswer {
+  id String @id @default(uuid())
+
+  attempt_id String
+  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id])
+
+  question_id String
+  question Question @relation(fields: [question_id], references: [id])
+
+  choice_id String
+  choice Choice @relation(fields: [choice_id], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("multiple_choice_answers")
+}
+
+model Discussion {
+  id String @id @default(uuid())
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  student_id String
+  student Student @relation(fields: [student_id], references: [id])
+
+  title String @db.VarChar(100)
+  description String @db.Text
+  is_open Boolean @default(true)
+  reply Reply[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("discussions")
+}
+
+model Reply {
+  id String @id @default(uuid())
+
+  discussion_id String
+  discussion Discussion @relation(fields: [discussion_id], references: [id])
+
+  student_id String
+  student Student @relation(fields: [student_id], references: [id])
+
+  reply String @db.VarChar(100)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("replies")
+}
