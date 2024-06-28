@@ -15,8 +15,11 @@ export default function AppProvider({
   children: React.ReactNode;
 }) {
   const [cardType, setCardType] = useState<string>("grid");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const appContextValue = {
+    sheetOpen,
+    setSheetOpen,
     cardType,
     setCardType,
   };

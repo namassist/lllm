@@ -3,149 +3,49 @@
 import * as React from "react";
 import { useCompletion } from "ai/react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-  MoreHorizontal,
   Sparkles,
-  Timer,
   Plus,
   Trash2,
   FileQuestion,
-  List,
   CircleX,
   CircleCheck,
 } from "lucide-react";
 import AuthLayout from "@/components/layouts/AuthLayout";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+} from "@/components/ui/sheet";
+import AddQuestion from "@/components/forms/add-question";
+import { useAppContext } from "@/context/app-context";
+import AddExam from "@/components/forms/add-exam";
+import GenerateQuiz from "@/components/forms/generate-quiz";
 
 export default function Page() {
+  const {
+    sheetOpen,
+    setSheetOpen,
+  }: {
+    sheetOpen: boolean;
+    setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  } = useAppContext() as {
+    sheetOpen: boolean;
+    setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  };
   const { completion, input, handleInputChange, handleSubmit, isLoading } =
     useCompletion({
       api: "/api/completion",
     });
-  const [timer, setTimer] = React.useState(5);
-
-  const duration = [
-    {
-      label: "5m",
-      value: 5,
-    },
-    {
-      label: "10m",
-      value: 10,
-    },
-    {
-      label: "15m",
-      value: 15,
-    },
-    {
-      label: "30m",
-      value: 30,
-    },
-    {
-      label: "45m",
-      value: 45,
-    },
-    {
-      label: "60m",
-      value: 60,
-    },
-    {
-      label: "90m",
-      value: 90,
-    },
-    {
-      label: "120m",
-      value: 120,
-    },
-  ];
 
   return (
     <AuthLayout>
       <div className="space-y-5">
-        <form
-          onSubmit={handleSubmit}
-          className="flex justify-between mt-5 items-start"
-        >
-          <div className="space-y-4">
-            <div className="grid gap-3 w-10/12">
-              <Label htmlFor="title" className="text-muted-foreground">
-                Title
-              </Label>
-              <Input
-                id="title"
-                name="title"
-                type="text"
-                className="w-full border-none focus-visible:ring-0 p-0 text-3xl font-bold"
-                placeholder="Title of the exam"
-                required
-              />
-            </div>
-            <div className="flex gap-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button size="sm" variant="outline" className="h-8 gap-1">
-                    <Timer className="h-4 w-4" />
-                    {timer}m
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[300px]">
-                  <div className="flex flex-wrap gap-3">
-                    {duration?.map((item) => (
-                      <Button
-                        key={item.value}
-                        size="sm"
-                        variant="outline"
-                        className={`h-8 gap-1 ${
-                          timer === item.value ? "bg-muted-foreground/50" : ""
-                        }`}
-                        onClick={() => setTimer(item.value)}
-                      >
-                        {item.label}
-                      </Button>
-                    ))}
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <DateTimePicker granularity="second" hourCycle={24} />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              className="disabled:cursor-not-allowed rounded-xl"
-            >
-              Publish
-            </Button>
-          </div>
-        </form>
-        {/* <input
-            name="prompt"
-            value={input}
-            onChange={handleInputChange}
-            id="input"
-            /> */}
+        <AddExam />
         <div className="flex gap-2 justify-between">
           <Input
             type="search"
@@ -153,15 +53,42 @@ export default function Page() {
             className="md:w-[100px] lg:w-[400px] rounded-lg focus-visible:ring-0"
           />
           <div className="flex gap-2">
-            <Button className="rounded-lg">
-              <Sparkles className="h-4 w-4 mr-1" /> Generate with AI
-            </Button>
-            <Button variant="outline" className="gap-1 rounded-lg">
-              <Plus className="h-4 w-4" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
-                Question
-              </span>
-            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button className="rounded-lg">
+                  <Sparkles className="h-4 w-4 mr-1" /> Generate with AI
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="bottom"
+                className="rounded-t-xl h-[100vh] overflow-y-auto dark:bg-slate-950 flex justify-center"
+              >
+                <div className="h-2 w-40 bg-foreground/10 opacity-40 mx-auto rounded-full mb-5 absolute top-7"></div>
+                <div className="absolute bottom-0 left-0 right-0 top-14 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+                <SheetHeader className="space-y-5 w-full lg:w-[60%] z-20 mt-14">
+                  <GenerateQuiz />
+                </SheetHeader>
+              </SheetContent>
+            </Sheet>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="gap-1 rounded-lg">
+                  <Plus className="h-4 w-4" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
+                    Question
+                  </span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="bottom"
+                className="rounded-t-xl h-[80vh] overflow-y-auto"
+              >
+                <div className="h-2 w-40 bg-foreground/10 opacity-40 mx-auto rounded-full mb-5"></div>
+                <SheetHeader className="container px-[250px]">
+                  <AddQuestion />
+                </SheetHeader>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
         <div className="space-y-5">
