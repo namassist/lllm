@@ -7,7 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Save, Check, Trash, Plus } from "lucide-react";
 import { useAppContext } from "@/context/app-context";
 import { createQuestion } from "@/actions/question";
-import { useRouter } from "next/navigation";
 
 interface Option {
   choice: string;
@@ -15,28 +14,14 @@ interface Option {
   image?: string;
 }
 
-export default function AddQuestion({
-  courseId,
-  examId,
-}: {
-  courseId: string;
-  examId: string;
-}) {
-  const router = useRouter();
-  const {
-    setSheetOpen,
-  }: {
-    setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  } = useAppContext() as {
-    setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  };
-
-  const [options, setOptions] = useState<Option[]>([]);
+export default function EditQuestion({ questions }: { questions: any }) {
+  console.log(questions);
+  const [question, setQuestion] = useState(questions?.question);
+  const [score, setScore] = useState<number>(questions?.score);
+  const [options, setOptions] = useState<Option[]>(questions?.choice);
   const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
-    null
+    questions.choice.findIndex((option: any) => option.is_correct)
   );
-  const [question, setQuestion] = useState<string>("");
-  const [score, setScore] = useState<number>(0);
 
   const addOption = () => {
     setOptions((prevOptions) => [
@@ -83,9 +68,7 @@ export default function AddQuestion({
       const createdQuestion = await createQuestion({
         question,
         score,
-        exam_id: examId,
         choice: options,
-        course_id: courseId,
       });
 
       if (createdQuestion?.message) {
@@ -117,7 +100,7 @@ export default function AddQuestion({
       <p className="text-muted-foreground text-xs">Pilihan Jawaban</p>
 
       {/* Options */}
-      {options.map((option, index) => (
+      {options?.map((option, index) => (
         <div className="relative" key={index}>
           <div
             contentEditable
@@ -166,7 +149,7 @@ export default function AddQuestion({
       >
         <Plus className="h-4 w-4 mr-1" /> Add option
       </Button>
-      <div className="flex justify-end">
+      <div className="flex justify-end pb-5">
         <Button onClick={handleSubmit} className="rounded-lg" size="sm">
           <Save className="h-4 w-4 mr-1" /> Save
         </Button>

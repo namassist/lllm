@@ -26,6 +26,7 @@ export const saveCourse = async (prevSate: any, formData: FormData) => {
       Error: validatedFields.error.flatten().fieldErrors,
     };
   }
+
   try {
     await db.course.create({
       data: {
@@ -38,12 +39,12 @@ export const saveCourse = async (prevSate: any, formData: FormData) => {
         instructor_id: validatedFields.data.instructor_id,
       },
     });
-
-    revalidatePath("/admin/courses");
-    return { message: "success added course" };
   } catch (error) {
     return { message: "Failed to create course" };
   }
+
+  revalidatePath("/admin/courses");
+  return { message: "success added course" };
 };
 
 export const deleteCourse = async (id: string) => {
@@ -51,10 +52,10 @@ export const deleteCourse = async (id: string) => {
     await db.course.delete({
       where: { id },
     });
-
-    revalidatePath("/admin/courses");
-    return { message: "success deleted course" };
   } catch (error) {
     return { message: "Failed to delete course" };
   }
+
+  revalidatePath("/admin/courses");
+  return { message: "success deleted course" };
 };

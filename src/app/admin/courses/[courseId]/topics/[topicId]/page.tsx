@@ -9,7 +9,6 @@ export default async function Page({
 }) {
   if (params.topicId) {
     const topic = await getTopicByCourse(params.topicId);
-    console.log(topic);
 
     return (
       <AuthLayout>

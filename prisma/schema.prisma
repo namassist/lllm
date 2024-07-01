@@ -34,10 +34,10 @@ model Role {
 
 model UserRole {
   user_id String @db.VarChar(100) @unique
-  user   Users @relation(fields: [user_id], references: [id])
+  user   Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   role_id String @db.VarChar(100) @unique
-  role   Role @relation(fields: [role_id], references: [id])
+  role   Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -53,7 +53,7 @@ model Student {
   gender    Gender
 
   user_id   String @db.VarChar(100) @unique
-  user      Users   @relation(fields: [user_id], references: [id])
+  user      Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   examAttempt ExamAttempt[]
   discussion Discussion[]
@@ -78,7 +78,7 @@ model Instructor {
   gender    Gender
 
   user_id   String @db.VarChar(100) @unique
-  user      Users   @relation(fields: [user_id], references: [id])
+  user      Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   course Course[]
   
@@ -96,7 +96,7 @@ model Course {
   isPublished Boolean @default(false)
 
   instructor_id String
-  instructor Instructor @relation(fields: [instructor_id], references: [id])
+  instructor Instructor @relation(fields: [instructor_id], references: [id], onDelete: Cascade)
 
   category_id String?
   topics Topics[]
@@ -113,10 +113,10 @@ model EnrollmentCourse {
   id  String @id @default(uuid())
 
   course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
 
   student_id String
-  student Student @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,7 +129,7 @@ model Topics {
   description String @db.Text
 
   course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -142,7 +142,7 @@ model Exam {
   description String @db.Text
 
   course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
 
   duration Int
   held_at DateTime
@@ -161,7 +161,7 @@ model Question {
   question String @db.Text
 
   exam_id String
-  exam Exam @relation(fields: [exam_id], references: [id])
+  exam Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
 
   score Int
   image String? @db.Text
@@ -179,7 +179,7 @@ model Choice {
   choice String @db.Text
 
   question_id String
-  question Question @relation(fields: [question_id], references: [id])
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
   is_correct Boolean
   image String? @db.Text
@@ -194,10 +194,10 @@ model ExamAttempt {
   id String @id @default(uuid())
   
   exam_id String
-  exam Exam @relation(fields: [exam_id], references: [id])
+  exam Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
 
   student_id String
-  student Student @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   start_at DateTime
   finished_at DateTime
@@ -215,10 +215,10 @@ model EssayAnswer {
   id String @id @default(uuid())
 
   attempt_id String
-  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id])
+  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
 
   question_id String
-  question Question @relation(fields: [question_id], references: [id])
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
   answer String @db.Text
   score Int
@@ -232,13 +232,13 @@ model MultipleChoiceAnswer {
   id String @id @default(uuid())
 
   attempt_id String
-  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id])
+  examAttempt ExamAttempt @relation(fields: [attempt_id], references: [id], onDelete: Cascade)
 
   question_id String
-  question Question @relation(fields: [question_id], references: [id])
+  question Question @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
   choice_id String
-  choice Choice @relation(fields: [choice_id], references: [id])
+  choice Choice @relation(fields: [choice_id], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -249,10 +249,10 @@ model Discussion {
   id String @id @default(uuid())
 
   course_id String
-  course Course @relation(fields: [course_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
 
   student_id String
-  student Student @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   title String @db.VarChar(100)
   description String @db.Text
@@ -268,10 +268,10 @@ model Reply {
   id String @id @default(uuid())
 
   discussion_id String
-  discussion Discussion @relation(fields: [discussion_id], references: [id])
+  discussion Discussion @relation(fields: [discussion_id], references: [id], onDelete: Cascade)
 
   student_id String
-  student Student @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   reply String @db.VarChar(100)
 

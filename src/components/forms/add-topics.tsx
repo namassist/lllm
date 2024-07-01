@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFormStatus, useFormState } from "react-dom";
 import { saveTopic } from "@/actions/topic";
-import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const initialState = {
   message: "",
@@ -15,19 +15,20 @@ const initialState = {
 };
 
 export default function AddTopics({ course_id }: { course_id: string }) {
-  const { toast } = useToast();
   const router = useRouter();
   const [state, formAction] = useFormState(saveTopic, initialState);
-  const description = window.localStorage.getItem("novel-content") as string;
+  const [desc, setDesc] = React.useState<string>("");
 
   React.useEffect(() => {
+    const savedValue = window.localStorage.getItem("novel-content") as string;
+    setDesc(savedValue);
+
     if (state?.message) {
-      toast({
-        description: state?.message,
-      });
+      window.localStorage.setItem("novel-content", "");
+      toast.success(state?.message);
       router.push(`/admin/courses/${course_id}`);
     }
-  }, [course_id, router, state?.message, toast]);
+  }, [course_id, desc, router, setDesc, state?.message]);
 
   return (
     <form action={formAction} className="flex justify-between">
@@ -43,7 +44,7 @@ export default function AddTopics({ course_id }: { course_id: string }) {
           placeholder="Title of the topic"
           required
         />
-        <input type="hidden" name="description" value={description} required />
+        <input type="hidden" name="description" value={desc} required />
         <input type="hidden" name="course_id" value={course_id} required />
       </div>
       <SubmitButton />

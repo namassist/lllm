@@ -34,7 +34,9 @@ export const getCoursesById = async (id: string) => {
       where: { id: id },
       include: {
         instructor: true,
-        topics: true,
+        topics: {
+          orderBy: { createdAt: "asc" },
+        },
         exam: true,
         discussion: true,
         enrollmentCourse: true,
@@ -83,6 +85,7 @@ export const getTopicByCourse = async (id: string) => {
         title: true,
         description: true,
       },
+      orderBy: { createdAt: "asc" },
     });
     return result;
   } catch (error) {

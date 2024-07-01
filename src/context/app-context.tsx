@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export const AppContext = React.createContext({});
 
@@ -16,12 +17,15 @@ export default function AppProvider({
 }) {
   const [cardType, setCardType] = useState<string>("grid");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [font, setFont] = useLocalStorage<string>("novel__font", "Default");
 
   const appContextValue = {
     sheetOpen,
     setSheetOpen,
     cardType,
     setCardType,
+    font,
+    setFont,
   };
 
   return (

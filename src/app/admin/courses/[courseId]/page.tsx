@@ -44,20 +44,22 @@ import {
 } from "@/components/ui/popover";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import AddExams from "@/components/forms/add-exams";
+import { deleteExam } from "@/actions/exam";
 
 interface TabProps {
+  tab: string;
   searchParams: {
-    tab?: string;
+    tab: string;
   };
 }
 
-export default async function Page({
-  searchParams,
-  params,
-}: {
+interface PageProps {
   searchParams: TabProps;
   params: { courseId: string };
-}) {
+}
+
+export default async function Page({ searchParams, params }: PageProps) {
   const data = await getCoursesById(params.courseId);
   const session = await getServerSession(authOptions);
 
@@ -83,7 +85,7 @@ export default async function Page({
           <Card>
             <div className="relative text-gray-100 font-semibold">
               <CardImage
-                src={data?.image}
+                src={data?.image as string}
                 alt={`picture of ${data?.title}`}
                 width={1000}
                 height={1000}
@@ -221,8 +223,20 @@ export default async function Page({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Link
+                            href={`/admin/courses/${params.courseId}/exams/${exam.id}`}
+                          >
+                            Edit
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <form action={deleteExam.bind(null, exam.id)}>
+                            <Button variant="ghost" className="p-0 h-auto">
+                              Delete
+                            </Button>
+                          </form>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -292,21 +306,8 @@ export default async function Page({
               <ChevronUp className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-0 w-32 border-none bg-red-200 -ml-24 mt-1">
-            <Button
-              className="gap-1 w-full focus-visible:ring-0 rounded-xl"
-              asChild
-            >
-              <Link
-                href={`/admin/courses/${params.courseId}/exams`}
-                className="cursor-pointer"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
-                  Exams
-                </span>
-              </Link>
-            </Button>
+          <PopoverContent className="p-0 w-32 border-none -ml-24 mt-1">
+            <AddExams courseId={params.courseId} />
           </PopoverContent>
         </Popover>
       </div>

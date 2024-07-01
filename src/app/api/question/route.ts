@@ -1,9 +1,9 @@
 import { db } from "@/lib/db";
 
-export async function POST(request: Request) {
-  const { question, score, choices } = await request.json();
+export async function POST(req: Request) {
+  const { question, score, choices, exam_id } = await req.json();
 
-  if (!question || !score || !choices) {
+  if (!question || !score || !choices || !exam_id) {
     return Response.json(
       {
         error: "Missing required fields",
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       data: {
         question,
         score,
-        exam_id: "0053c8bd-fb4b-41d3-956d-3e8df7f34331",
+        exam_id: exam_id,
         choice: {
           create: choices.map((choice: any) => ({
             choice: choice.choice,

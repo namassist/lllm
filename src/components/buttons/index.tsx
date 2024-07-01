@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,

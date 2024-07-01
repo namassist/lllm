@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 const TopicSchema = z.object({
   title: z.string().min(6),
@@ -32,10 +31,10 @@ export const saveTopic = async (prevSate: any, formData: FormData) => {
         course_id: validatedFields.data.course_id,
       },
     });
-
-    revalidatePath(`/admin/courses/${course_id}/topics`);
-    return { message: "Success added topic", course_id: course_id };
   } catch (error) {
     return { message: "Failed to create topic", error: error };
   }
+
+  revalidatePath(`/admin/courses/${course_id}/topics`);
+  return { message: "Success added topic", course_id: course_id };
 };
