@@ -5,8 +5,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Save, Check, Trash, Plus } from "lucide-react";
-import { useAppContext } from "@/context/app-context";
-import { createQuestion } from "@/actions/question";
+import { updateQuestion } from "@/actions/question";
 
 interface Option {
   choice: string;
@@ -15,7 +14,6 @@ interface Option {
 }
 
 export default function EditQuestion({ questions }: { questions: any }) {
-  console.log(questions);
   const [question, setQuestion] = useState(questions?.question);
   const [score, setScore] = useState<number>(questions?.score);
   const [options, setOptions] = useState<Option[]>(questions?.choice);
@@ -64,19 +62,19 @@ export default function EditQuestion({ questions }: { questions: any }) {
       return toast.error("At least one option must be correct");
     }
 
+    const loading = toast.loading("submitting...");
     try {
-      const createdQuestion = await createQuestion({
+      const updatedQuestion = await updateQuestion({
+        id: questions.id,
         question,
+        exam_id: questions.exam_id,
         score,
         choice: options,
       });
 
-      if (createdQuestion?.message) {
-        toast.success(createdQuestion?.message);
-        setQuestion("");
-        setScore(0);
-        setOptions([]);
-        setSelectedOptionIndex(null);
+      if (updatedQuestion?.message) {
+        toast.dismiss(loading);
+        toast.success(updatedQuestion?.message);
       }
     } catch (error) {
       toast.error("Something went wrong");

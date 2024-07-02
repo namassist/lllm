@@ -79,6 +79,7 @@ export default function AddQuestion({
       return toast.error("At least one option must be correct");
     }
 
+    const loading = toast.loading("submitting...");
     try {
       const createdQuestion = await createQuestion({
         question,
@@ -89,6 +90,7 @@ export default function AddQuestion({
       });
 
       if (createdQuestion?.message) {
+        toast.dismiss(loading);
         toast.success(createdQuestion?.message);
         setQuestion("");
         setScore(0);

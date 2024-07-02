@@ -10,12 +10,8 @@ const TopicSchema = z.object({
   course_id: z.string().min(6),
 });
 
-export const saveTopic = async (prevSate: any, formData: FormData) => {
-  const validatedFields = TopicSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
-
-  const { course_id } = Object.fromEntries(formData.entries());
+export const saveTopic = async (data: any) => {
+  const validatedFields = TopicSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
@@ -35,6 +31,20 @@ export const saveTopic = async (prevSate: any, formData: FormData) => {
     return { message: "Failed to create topic", error: error };
   }
 
-  revalidatePath(`/admin/courses/${course_id}/topics`);
-  return { message: "Success added topic", course_id: course_id };
+  revalidatePath(`/admin/courses/${validatedFields.data.course_id}/topics`);
+  return { message: "Success added topic" };
+};
+
+export const deleteTopic = async (id: string) => {
+  let result;
+
+  try {
+    result = await db.topics.delete({
+      where: { id },
+    });
+  } catch (error) {
+    return { message: "Failed to delete topic" };
+  }
+
+  revalidatePath(`/admin/courses/${result.course_id}`);
 };

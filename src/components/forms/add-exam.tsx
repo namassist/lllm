@@ -54,12 +54,14 @@ export default function AddExam({ data }: DataProps) {
   };
 
   const handleSubmit = async () => {
+    const loading = toast.loading("submitting...");
     const updateExamWithId = await updateExam(data.id, {
       ...input,
       held_at: heldAt,
     });
 
     if (updateExamWithId.message) {
+      toast.dismiss(loading);
       toast.success(updateExamWithId.message);
     }
   };

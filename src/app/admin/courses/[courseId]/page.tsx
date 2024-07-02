@@ -46,6 +46,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import AddExams from "@/components/forms/add-exams";
 import { deleteExam } from "@/actions/exam";
+import { deleteTopic } from "@/actions/topic";
 
 interface TabProps {
   tab: string;
@@ -159,12 +160,12 @@ export default async function Page({ searchParams, params }: PageProps) {
                   </CardHeader>
                   <CardContent>
                     <Card>
-                      <CardContent className="p-4">
+                      <CardContent className="p-4 flex gap-3 items-center">
+                        <Book className="h-7 w-7" />
                         <Link
                           href={`/admin/courses/${params.courseId}/topics/${topic.id}`}
-                          className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
+                          className="hover:opacity-50 cursor-pointer"
                         >
-                          <Book className="h-7 w-7" />
                           <p>{topic.title}</p>
                         </Link>
                       </CardContent>
@@ -185,7 +186,13 @@ export default async function Page({ searchParams, params }: PageProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <form action={deleteTopic.bind(null, topic.id)}>
+                            <Button variant="ghost" className="p-0 h-auto">
+                              Delete
+                            </Button>
+                          </form>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

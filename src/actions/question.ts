@@ -4,11 +4,10 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
-// Definisikan schema untuk Option
 const choicesSchema = z.object({
   choice: z.string(),
   isCorrect: z.boolean(),
-  image: z.string().optional(),
+  image: z.string().optional().nullable(),
 });
 
 const QuestionSchema = z.object({
@@ -48,6 +47,42 @@ export const createQuestion = async (data: any) => {
 
   revalidatePath(`/admin/courses/${data?.courseId}/exams/${result?.exam_id}`);
   return { message: "success added question" };
+};
+
+export const updateQuestion = async (data: any) => {
+  const validatedFields = QuestionSchema.safeParse(data);
+
+  if (!validatedFields.success) {
+    return {
+      Error: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  let result;
+  try {
+    await db.choice.deleteMany({
+      where: { question_id: data.id },
+    });
+
+    result = await db.question.update({
+      where: { id: data.id },
+      data: {
+        question: validatedFields.data.question,
+        score: validatedFields.data.score,
+        choice: {
+          create: validatedFields.data.choice.map((choice: any) => ({
+            choice: choice.choice,
+            is_correct: choice.isCorrect,
+          })),
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  revalidatePath(`/admin/courses/${data?.courseId}/exams/${result?.exam_id}`);
+  return { message: "success update question" };
 };
 
 export const createBulkQuestion = async (data: any, examId: string) => {

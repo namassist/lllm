@@ -52,7 +52,6 @@ export async function POST(req: Request) {
     }),
   });
   const { total, subject, topic } = result.object;
-  console.log(topic);
 
   let generateQuizPrompt = "";
   if (withOptions) {

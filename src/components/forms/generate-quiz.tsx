@@ -68,9 +68,11 @@ export default function GenerateQuiz({ examId }: { examId: string }) {
 
   const handleSaveQuestion = async () => {
     try {
+      const loading = toast.loading("submitting...");
       const createdBulkQuestion = await createBulkQuestion(quizData, examId);
 
       if (createdBulkQuestion?.message) {
+        toast.dismiss(loading);
         toast.success(createdBulkQuestion?.message);
       }
     } catch (error) {
