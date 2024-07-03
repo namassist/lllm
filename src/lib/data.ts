@@ -40,6 +40,7 @@ export const getCoursesById = async (id: string) => {
         exam: true,
         discussion: true,
         enrollmentCourse: true,
+        categories: true,
       },
     });
     return result;

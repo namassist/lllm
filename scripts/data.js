@@ -28,6 +28,13 @@ const users = [
     password: "$2b$10$tf90BB8w9fPgr/2pBe2uKOWYzmsSYjO91Wvzhiur3z71yMo6pa3ly", //secretjajang
     image: "",
   },
+  {
+    id: randomUUID(),
+    email: "umiri@gmail.com",
+    username: "superumiri",
+    password: "$2b$10$tf90BB8w9fPgr/2pBe2uKOWYzmsSYjO91Wvzhiur3z71yMo6pa3ly", //secretjajang
+    image: "",
+  },
 ];
 
 // Seed user roles
@@ -40,6 +47,10 @@ const userRoles = [
     user_id: users[1].id,
     role_id: roles[1].id,
   },
+  {
+    user_id: users[2].id,
+    role_id: roles[1].id,
+  },
 ];
 
 // Seed students
@@ -50,7 +61,7 @@ const students = [
     address: "123 Main St",
     phone: "1234567890",
     gender: "male",
-    user_id: users[0].id,
+    user_id: users[1].id,
   },
   {
     id: randomUUID(),
@@ -58,7 +69,7 @@ const students = [
     address: "456 Elm St",
     phone: "0987654321",
     gender: "female",
-    user_id: users[1].id,
+    user_id: users[2].id,
   },
 ];
 
@@ -72,175 +83,49 @@ const instructors = [
     gender: "male",
     user_id: users[0].id,
   },
+];
+
+const categories = [
   {
     id: randomUUID(),
-    fullname: "Dr. Johnson",
-    address: "321 Pine St",
-    phone: "4445556666",
-    gender: "female",
-    user_id: users[1].id,
+    name: "EK",
+  },
+  {
+    id: randomUUID(),
+    name: "IK",
+  },
+  {
+    id: randomUUID(),
+    name: "IL",
+  },
+  {
+    id: randomUUID(),
+    name: "LT",
+  },
+  {
+    id: randomUUID(),
+    name: "TI",
+  },
+  {
+    id: randomUUID(),
+    name: "TK",
   },
 ];
 
-// Seed courses
 const courses = [
   {
     id: randomUUID(),
-    title: "Introduction to Programming",
-    description: "Learn the basics of programming.",
-    image: "",
-    key: "intro_programming",
+    title: "Basis Data",
+    description:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc nisl ultricies nunc, nec ultricies nunc nisl nec nunc.",
+    image: "/bg.webp",
+    key: "BASISDATA4A",
     isPublished: true,
+    category_id: categories[4].id,
     instructor_id: instructors[0].id,
   },
-  {
-    id: randomUUID(),
-    title: "Advanced Mathematics",
-    description: "Explore advanced topics in mathematics.",
-    image: "",
-    key: "adv_math",
-    isPublished: true,
-    instructor_id: instructors[1].id,
-  },
 ];
 
-// Seed topics
-const topics = [
-  {
-    id: randomUUID(),
-    title: "Variables and Data Types",
-    description: "Introduction to variables and data types.",
-    course_id: courses[0].id,
-  },
-  {
-    id: randomUUID(),
-    title: "Control Flow",
-    description: "Learn about control flow statements.",
-    course_id: courses[0].id,
-  },
-  {
-    id: randomUUID(),
-    title: "Calculus",
-    description: "Fundamentals of calculus.",
-    course_id: courses[1].id,
-  },
-  {
-    id: randomUUID(),
-    title: "Linear Algebra",
-    description: "Learn the basics of linear algebra.",
-    course_id: courses[1].id,
-  },
-];
-
-// Seed exams
-const exams = [
-  {
-    id: randomUUID(),
-    name: "Intro Programming Exam",
-    description: "Final exam for Intro to Programming.",
-    course_id: courses[0].id,
-    duration: 60,
-    held_at: new Date(),
-    isPublished: true,
-  },
-  {
-    id: randomUUID(),
-    name: "Advanced Math Exam",
-    description: "Final exam for Advanced Mathematics.",
-    course_id: courses[1].id,
-    duration: 90,
-    held_at: new Date(),
-    isPublished: true,
-  },
-];
-
-// Seed questions
-const questions = [
-  {
-    id: randomUUID(),
-    question: "What is a variable?",
-    exam_id: exams[0].id,
-    score: 10,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    question: "Explain control flow.",
-    exam_id: exams[0].id,
-    score: 10,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    question: "What is the derivative of x^2?",
-    exam_id: exams[1].id,
-    score: 10,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    question: "Solve the matrix equation Ax = b.",
-    exam_id: exams[1].id,
-    score: 10,
-    image: "",
-  },
-];
-
-// Seed choices
-const choices = [
-  {
-    id: randomUUID(),
-    choice: "A storage location for data",
-    question_id: questions[0].id,
-    is_correct: true,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    choice: "A type of loop",
-    question_id: questions[1].id,
-    is_correct: true,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    choice: "2x",
-    question_id: questions[2].id,
-    is_correct: true,
-    image: "",
-  },
-  {
-    id: randomUUID(),
-    choice: "Solve for x",
-    question_id: questions[3].id,
-    is_correct: true,
-    image: "",
-  },
-];
-
-// Seed exam attempts
-const examAttempts = [
-  {
-    id: randomUUID(),
-    exam_id: exams[0].id,
-    student_id: students[0].id,
-    start_at: new Date(),
-    finished_at: new Date(),
-    score: 90,
-    feedback: "Good job!",
-  },
-  {
-    id: randomUUID(),
-    exam_id: exams[1].id,
-    student_id: students[1].id,
-    start_at: new Date(),
-    finished_at: new Date(),
-    score: 85,
-    feedback: "Well done!",
-  },
-];
-
-// Seed enrollment courses
 const enrollmentCourses = [
   {
     id: randomUUID(),
@@ -249,44 +134,109 @@ const enrollmentCourses = [
   },
   {
     id: randomUUID(),
-    course_id: courses[1].id,
-    student_id: students[1].id,
-  },
-];
-
-// Seed discussions
-const discussions = [
-  {
-    id: randomUUID(),
     course_id: courses[0].id,
-    student_id: students[0].id,
-    title: "Discussion on Variables",
-    description: "Let's discuss the concept of variables in programming.",
-    is_open: true,
-  },
-  {
-    id: randomUUID(),
-    course_id: courses[1].id,
     student_id: students[1].id,
-    title: "Discussion on Calculus",
-    description: "Discussing the fundamental theorem of calculus.",
-    is_open: true,
   },
 ];
 
-// Seed replies
-const replies = [
+const topics = [
   {
     id: randomUUID(),
-    discussion_id: discussions[0].id,
-    student_id: students[0].id,
-    reply: "I think variables are essential in programming.",
+    title: "Introduction to basis data",
+    description: `{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","marks":[{"type":"textStyle","attrs":{"color":"#A8A29E"}}],"text":"introduction basis data"}]},{"type":"paragraph","content":[{"type":"text","marks":[{"type":"textStyle","attrs":{"color":"#A8A29E"}}],"text":"On a fundamental level, data acts as the cornerstone of information across a multitude of formats and frameworks, delivering valuable perspectives and assistance for decision-making procedures within diverse sectors and industries. "},{"type":"text","marks":[{"type":"textStyle","attrs":{"color":"#A8A29E"}},{"type":"bold"}],"text":"Data"},{"type":"text","marks":[{"type":"textStyle","attrs":{"color":"#A8A29E"}}],"text":" forms the essential elements for scrutinizing and comprehending. Data's significance lies in its ability to empower organizations and individuals to derive meaning, identify patterns, and draw conclusions from the vast sea of information available. It is through data that businesses can strategically plan, scientists can make groundbreaking discoveries, and policymakers can formulate effective strategies. In essence, data is the lifeblood of modern-day operations, driving innovation, progress, and efficiency across the board."}]}]}`,
+    course_id: courses[0].id,
+  },
+];
+
+const exams = [
+  {
+    id: randomUUID(),
+    name: "Mid Exam",
+    description: "Exam 1 description",
+    course_id: courses[0].id,
+    held_at: new Date(),
+    duration: 45,
+    isPublished: true,
+  },
+];
+
+const questions = [
+  {
+    id: randomUUID(),
+    question: "Apa tujuan utama dari normalisasi data dalam basis data?",
+    exam_id: exams[0].id,
+    score: 10,
   },
   {
     id: randomUUID(),
-    discussion_id: discussions[1].id,
-    student_id: students[1].id, // replace with actual student id
-    reply: "Calculus is crucial for understanding changes.",
+    question:
+      "Apa yang dimaksud dengan ketergantungan fungsional dalam basis data?	",
+    exam_id: exams[0].id,
+    score: 10,
+  },
+  {
+    id: randomUUID(),
+    question:
+      "Manakah dari berikut ini yang merupakan bentuk normal pertama (1NF)?	",
+    exam_id: exams[0].id,
+    score: 10,
+  },
+];
+
+const options = [
+  {
+    id: randomUUID(),
+    choice: "choice 1A",
+    is_correct: true,
+    question_id: questions[0].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 1B",
+    is_correct: false,
+    question_id: questions[0].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 1C",
+    is_correct: false,
+    question_id: questions[0].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 2A",
+    is_correct: false,
+    question_id: questions[1].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 2B",
+    is_correct: false,
+    question_id: questions[1].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 2C",
+    is_correct: true,
+    question_id: questions[1].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 3A",
+    is_correct: false,
+    question_id: questions[2].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 3B",
+    is_correct: true,
+    question_id: questions[2].id,
+  },
+  {
+    id: randomUUID(),
+    choice: "choice 3C",
+    is_correct: false,
+    question_id: questions[2].id,
   },
 ];
 
@@ -296,13 +246,11 @@ module.exports = {
   userRoles,
   students,
   instructors,
+  categories,
   courses,
+  enrollmentCourses,
   topics,
   exams,
   questions,
-  choices,
-  examAttempts,
-  enrollmentCourses,
-  discussions,
-  replies,
+  options,
 };

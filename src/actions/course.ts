@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 const CourseSchema = z.object({
   title: z.string().min(6),
@@ -58,4 +58,82 @@ export const deleteCourse = async (id: string) => {
 
   revalidatePath("/admin/courses");
   return { message: "success deleted course" };
+};
+
+export const getStudentCourses = async (studentId: string) => {
+  try {
+    const studentCourses = await db.student.findUnique({
+      where: {
+        id: studentId,
+      },
+      include: {
+        enrollmentCourse: {
+          include: {
+            course: {
+              include: {
+                instructor: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const courses = studentCourses?.enrollmentCourse.map(
+      (enrollment) => enrollment.course
+    );
+
+    return courses;
+  } catch (error) {
+    return { message: "Failed to get courses" };
+  }
+};
+
+export const getCoursesById = async (id: string) => {
+  try {
+    const result = await db.course.findUnique({
+      where: { id: id },
+      include: {
+        instructor: true,
+        topics: {
+          orderBy: { createdAt: "asc" },
+        },
+        exam: true,
+        discussion: true,
+        enrollmentCourse: true,
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+};
+
+export const enrollmentCourse = async (data: any) => {
+  try {
+    const course = await db.course.findUnique({
+      where: {
+        id: data.course_id,
+      },
+      select: {
+        key: true,
+      },
+    });
+
+    if (course?.key === data.key) {
+      const result = await db.enrollmentCourse.create({
+        data: {
+          course_id: data.course_id,
+          student_id: data.student_id,
+        },
+      });
+    } else {
+      return { error: "invalid key" };
+    }
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+
+  revalidateTag(`/student/courses/${data.student_id}/preview`);
+  return { message: "successfully enrollment course" };
 };

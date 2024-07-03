@@ -14,7 +14,7 @@ export function handleAuthorization(req: any, pathname: any, token: any) {
 
   // Role-based access control
   const adminRoutes = ["/admin"];
-  const userRoutes = ["/dashboard", "/profile"];
+  const userRoutes = ["/student"];
 
   if (
     adminRoutes.some((route) => pathname.startsWith(route)) &&

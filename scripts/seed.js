@@ -6,29 +6,25 @@ const {
   userRoles,
   students,
   instructors,
+  categories,
   courses,
+  enrollmentCourses,
   topics,
   exams,
   questions,
-  choices,
-  examAttempts,
-  enrollmentCourses,
-  discussions,
-  replies,
+  options,
 } = require("./data");
 
 const seed = async () => {
   try {
     // Delete existing data
-    await prisma.reply.deleteMany();
-    await prisma.discussion.deleteMany();
     await prisma.choice.deleteMany();
     await prisma.question.deleteMany();
-    await prisma.examAttempt.deleteMany();
     await prisma.exam.deleteMany();
     await prisma.topics.deleteMany();
     await prisma.enrollmentCourse.deleteMany();
     await prisma.course.deleteMany();
+    await prisma.categories.deleteMany();
     await prisma.userRole.deleteMany();
     await prisma.student.deleteMany();
     await prisma.instructor.deleteMany();
@@ -66,11 +62,23 @@ const seed = async () => {
     });
     console.log("Seeded instructors");
 
-    // Seed courses
+    // Seed categories
+    await prisma.categories.createMany({
+      data: categories,
+    });
+    console.log("Seeded categories");
+
+    // Seed Courses
     await prisma.course.createMany({
       data: courses,
     });
     console.log("Seeded courses");
+
+    // Seed enrollment courses
+    await prisma.enrollmentCourse.createMany({
+      data: enrollmentCourses,
+    });
+    console.log("Seeded enrollment courses");
 
     // Seed topics
     await prisma.topics.createMany({
@@ -90,35 +98,11 @@ const seed = async () => {
     });
     console.log("Seeded questions");
 
-    // Seed choices
+    // Seed options
     await prisma.choice.createMany({
-      data: choices,
+      data: options,
     });
-    console.log("Seeded choices");
-
-    // Seed exam attempts
-    await prisma.examAttempt.createMany({
-      data: examAttempts,
-    });
-    console.log("Seeded exam attempts");
-
-    // Seed enrollment courses
-    await prisma.enrollmentCourse.createMany({
-      data: enrollmentCourses,
-    });
-    console.log("Seeded enrollment courses");
-
-    //seed discussions
-    await prisma.discussion.createMany({
-      data: discussions,
-    });
-    console.log("Seeded discussions");
-
-    //seed replies
-    await prisma.reply.createMany({
-      data: replies,
-    });
-    console.log("Seeded replies");
+    console.log("Seeded options");
   } catch (e) {
     console.error(e);
   } finally {

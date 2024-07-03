@@ -70,7 +70,7 @@ export default function Login() {
       const session = await getSession();
       session?.user?.role === "admin"
         ? router.push("/admin/dashboard")
-        : router.push("/dashboard");
+        : router.push("/student/dashboard");
 
       setIsLoading(false);
       if (session) {

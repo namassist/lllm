@@ -18,12 +18,14 @@ interface CardCourseProps {
   data: Course[];
   isDeleted: Boolean;
   preview?: Boolean;
+  enrollable?: Boolean;
 }
 
 const List: React.FC<CardCourseProps> = ({
   data,
   isDeleted = false,
   preview = false,
+  enrollable = false,
 }) => {
   return (
     <div className="w-full flex-col space-y-6">
@@ -57,7 +59,12 @@ const List: React.FC<CardCourseProps> = ({
               </p>
             </CardContent>
             <CardFooter className="p-0 px-0">
-              <Link href={`/admin/courses/${course?.id}`} className="ml-auto">
+              <Link
+                href={`${enrollable ? "/student" : "/admin"}/courses/${
+                  course?.id
+                }${preview ? "/preview" : "/"}`}
+                className="ml-auto"
+              >
                 <Button size="sm" variant="outline">
                   <Eye className="h-4 w-4 text-foreground mr-1" /> Detail
                 </Button>

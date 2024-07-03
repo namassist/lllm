@@ -19,16 +19,18 @@ interface CardCourseProps {
   data: Course[];
   isDeleted: Boolean;
   preview?: Boolean;
+  enrollable?: Boolean;
 }
 
 const Grid: React.FC<CardCourseProps> = ({
   data,
   isDeleted = false,
   preview,
+  enrollable,
 }) => {
   return (
     <div className="w-full flex flex-wrap items-center gap-6">
-      {data.map((course) => (
+      {data?.map((course) => (
         <Card className="w-full lg:w-[calc(33%_-_1.15rem)]" key={course?.id}>
           <div className="relative">
             <CardImage
@@ -56,9 +58,9 @@ const Grid: React.FC<CardCourseProps> = ({
             </CardContent>
             <CardFooter className="p-0 px-0">
               <Link
-                href={`/admin/courses/${course?.id}${
-                  preview ? "/preview" : "/"
-                }`}
+                href={`${enrollable ? "/student" : "/admin"}/courses/${
+                  course?.id
+                }${preview ? "/preview" : "/"}`}
                 className="ml-auto"
               >
                 <Button size="sm" variant="outline">

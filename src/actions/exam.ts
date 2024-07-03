@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const ExamSchema = z.object({
   name: z.string().min(6),
@@ -70,12 +71,74 @@ export const getExamById = async (id: string) => {
             choice: true,
           },
         },
+        course: true,
+        examAttempt: true,
       },
     });
     return result;
   } catch (error) {
     throw new Error("Failed to fetch data");
   }
+};
+
+export const startExam = async (data: any) => {
+  console.log(data);
+  try {
+    const result = await db.examAttempt.create({
+      data: {
+        exam_id: data.examId,
+        student_id: data.studentId,
+        finished_at: new Date(),
+        isActive: true,
+        feedback: "",
+      },
+    });
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+
+  redirect(`/student/courses/${data.courseId}/exams/${data.examId}`);
+};
+
+export const submittedAnswer = async (data: any) => {
+  try {
+    const { multipleChoice, essay, attemptId } = data;
+
+    //tambahkan data multipleChoice
+    const multipleChoicePromises = multipleChoice.map((answer: any) => {
+      return db.multipleChoiceAnswer.create({
+        data: {
+          attempt_id: answer.attemptId,
+          question_id: answer.questionId,
+          choice_id: answer.choiceId,
+        },
+      });
+    });
+
+    //tambahkan data answer
+    const essayPromises = essay.map((answer: any) => {
+      return db.essayAnswer.create({
+        data: {
+          attempt_id: answer.attemptId,
+          question_id: answer.questionId,
+          answer: answer.answer,
+          score: 0,
+        },
+      });
+    });
+
+    await Promise.all([...multipleChoicePromises, ...essayPromises]);
+
+    // update status examAttempt
+    await db.examAttempt.update({
+      where: { id: attemptId },
+      data: { isActive: false },
+    });
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+
+  redirect(`/student/courses/e91aa550-1e4d-4193-894a-e5506bae4d96`);
 };
 
 export const deleteExam = async (id: string) => {

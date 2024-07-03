@@ -13,13 +13,12 @@ import { SidebarItems } from "@/types/sidebar";
 import { useMediaQuery } from "usehooks-ts";
 import { SidebarMobile } from "./mobile";
 
-const sidebarItems: SidebarItems = {
+const sidebarInstructur: SidebarItems = {
   links: [
     { label: "Dashboard", href: "/admin/dashboard", icon: Home },
     { label: "Explore", href: "/admin/explores", icon: Compass },
     { label: "Courses", href: "/admin/courses", icon: Book },
     { label: "Exams", href: "/admin/exams", icon: BookUser },
-    { label: "Assignments", href: "/admin/assignments", icon: NotebookText },
     {
       label: "Profile",
       href: "/admin/profile",
@@ -28,14 +27,36 @@ const sidebarItems: SidebarItems = {
   ],
 };
 
-export function Sidebar() {
+const sidebarStudent: SidebarItems = {
+  links: [
+    { label: "Dashboard", href: "/student/dashboard", icon: Home },
+    { label: "Explore", href: "/student/explores", icon: Compass },
+    { label: "Courses", href: "/student/courses", icon: Book },
+    { label: "Exams", href: "/student/exams", icon: BookUser },
+    {
+      label: "Profile",
+      href: "/student/profile",
+      icon: User,
+    },
+  ],
+};
+
+export function Sidebar({ isStudent }: { isStudent: boolean }) {
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
   });
 
   if (isDesktop) {
-    return <SidebarDesktop sidebarItems={sidebarItems} />;
+    return (
+      <SidebarDesktop
+        sidebarItems={isStudent ? sidebarStudent : sidebarInstructur}
+      />
+    );
   }
 
-  return <SidebarMobile sidebarItems={sidebarItems} />;
+  return (
+    <SidebarMobile
+      sidebarItems={isStudent ? sidebarStudent : sidebarInstructur}
+    />
+  );
 }

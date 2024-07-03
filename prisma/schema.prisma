@@ -36,7 +36,7 @@ model UserRole {
   user_id String @db.VarChar(100) @unique
   user   Users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  role_id String @db.VarChar(100) @unique
+  role_id String @db.VarChar(100)
   role   Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
@@ -97,8 +97,10 @@ model Course {
 
   instructor_id String
   instructor Instructor @relation(fields: [instructor_id], references: [id], onDelete: Cascade)
+  
+  category_id String
+  categories Categories @relation(fields: [category_id], references: [id], onDelete: Cascade)
 
-  category_id String?
   topics Topics[]
   exam Exam[]
   discussion Discussion[]
@@ -121,6 +123,16 @@ model EnrollmentCourse {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("enrollment_courses")
+}
+
+model Categories {
+  id  String @id @default(uuid())
+  name String @db.Text
+  course Course[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("categories")
 }
 
 model Topics {
@@ -199,9 +211,9 @@ model ExamAttempt {
   student_id String
   student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
-  start_at DateTime
   finished_at DateTime
-  score Int
+  score Int?
+  isActive Boolean
   feedback String @db.Text
   essayAnswer EssayAnswer[]
   multiplechoiceAnswer MultipleChoiceAnswer[]

@@ -1,28 +1,9 @@
 import Link from "next/link";
 import { getCoursesById } from "@/lib/data";
-import { getServerSession } from "next-auth";
-
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Users,
-  NotebookText,
-  BookUser,
-  Plus,
-  ChevronUp,
-  Book,
-  MoreHorizontal,
-  Trash,
-} from "lucide-react";
+import { Users, NotebookText, BookUser, Book } from "lucide-react";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import {
   Card,
@@ -37,16 +18,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import AddExams from "@/components/forms/add-exams";
-import { deleteExam } from "@/actions/exam";
-import { deleteTopic } from "@/actions/topic";
 
 interface TabProps {
   tab: string;
@@ -62,14 +34,12 @@ interface PageProps {
 
 export default async function Page({ searchParams, params }: PageProps) {
   const data = await getCoursesById(params.courseId);
-  const session = await getServerSession(authOptions);
 
-  if (session?.user?.id !== data?.instructor_id) {
-    redirect("/admin/courses");
+  if (data?.enrollmentCourse.length === 0) {
+    redirect("/student/courses");
   }
 
   let currentTab = searchParams.tab ?? "courses";
-
   if (
     currentTab !== "discussions" &&
     currentTab !== "grades" &&
@@ -80,7 +50,7 @@ export default async function Page({ searchParams, params }: PageProps) {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout isStudent>
       <div className="flex gap-4">
         <div className="w-full lg:w-8/12 space-y-5">
           <Card>
@@ -163,7 +133,7 @@ export default async function Page({ searchParams, params }: PageProps) {
                       <CardContent className="p-4 flex gap-3 items-center">
                         <Book className="h-7 w-7" />
                         <Link
-                          href={`/admin/courses/${params.courseId}/topics/${topic.id}`}
+                          href={`/student/courses/${params.courseId}/topics/${topic.id}`}
                           className="hover:opacity-50 cursor-pointer"
                         >
                           <p>{topic.title}</p>
@@ -171,31 +141,6 @@ export default async function Page({ searchParams, params }: PageProps) {
                       </CardContent>
                     </Card>
                   </CardContent>
-                  <div className="absolute top-5 right-5">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <form action={deleteTopic.bind(null, topic.id)}>
-                            <Button variant="ghost" className="p-0 h-auto">
-                              Delete
-                            </Button>
-                          </form>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
                 </Card>
               ))}
               {data?.exam?.map((exam) => (
@@ -207,7 +152,7 @@ export default async function Page({ searchParams, params }: PageProps) {
                     <Card>
                       <CardContent className="p-4">
                         <Link
-                          href={`/admin/courses/${params.courseId}/exams/${exam.id}`}
+                          href={`/student/courses/${params.courseId}/exams/${exam.id}`}
                           className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
                         >
                           <BookUser className="h-7 w-7" />
@@ -216,37 +161,6 @@ export default async function Page({ searchParams, params }: PageProps) {
                       </CardContent>
                     </Card>
                   </CardContent>
-                  <div className="absolute top-5 right-5">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          aria-haspopup="true"
-                          size="icon"
-                          variant="ghost"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
-                          <Link
-                            href={`/admin/courses/${params.courseId}/exams/${exam.id}`}
-                          >
-                            Edit
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <form action={deleteExam.bind(null, exam.id)}>
-                            <Button variant="ghost" className="p-0 h-auto">
-                              Delete
-                            </Button>
-                          </form>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
                 </Card>
               ))}
             </TabsContent>
@@ -291,32 +205,6 @@ export default async function Page({ searchParams, params }: PageProps) {
             </CardContent>
           </Card>
         </div>
-      </div>
-      <div className="flex fixed bottom-10 right-10">
-        <Button
-          className="gap-1 rounded-l-2xl rounded-r-none border-r-[1px]"
-          asChild
-        >
-          <Link
-            href={`/admin/courses/${params.courseId}/topics`}
-            className="cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
-              Topics
-            </span>
-          </Link>
-        </Button>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button className="rounded-r-2xl rounded-l-none" size="icon">
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0 w-32 border-none -ml-24 mt-1">
-            <AddExams courseId={params.courseId} />
-          </PopoverContent>
-        </Popover>
       </div>
     </AuthLayout>
   );

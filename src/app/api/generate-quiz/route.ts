@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   if (withOptions) {
     generateQuizPrompt = `Buatlah ${total} soal pilihan ganda untuk materi ${subject} mengenai topik ${topic}, sertakan 4 pilihan jawaban dengan satu jawaban yang benar dan tiga pengecoh. tentukan juga skor untuk tiap soal!`;
   } else {
-    generateQuizPrompt = `Buatlah ${total} soal pilihan esay untuk materi ${subject} mengenai topik ${topic}, hanya sertakan satu pilihan jawaban yang benar saja (tanpa menyertakan jawabn yang salah) dan dalam bentuk kalimat yang singkat dan jelas. tentukan juga skor untuk tiap soal!`;
+    generateQuizPrompt = `Buatlah ${total} soal esay untuk materi ${subject} mengenai topik ${topic}, hanya sertakan satu pilihan jawaban yang benar saja (tanpa menyertakan jawabn yang salah) dan dalam bentuk kalimat yang jelas. tentukan juga skor untuk tiap soal!`;
   }
 
   const quiz = await generateObject({
