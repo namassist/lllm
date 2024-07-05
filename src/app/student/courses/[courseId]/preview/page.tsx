@@ -24,6 +24,7 @@ export default async function Page({
 }) {
   const session = await getSession();
   const course = await getCoursesById(params.courseId);
+  console.log(course);
 
   if (!course) {
     redirect("/student/explores");
@@ -83,12 +84,7 @@ export default async function Page({
                 Discover a world with our comprehensive courses and take your
                 learning to the next level!
               </p>
-              {course?.enrollmentCourse?.length === 0 ? (
-                <EnrollmentCourse
-                  courseId={course.id as string}
-                  studentId={session?.id as string}
-                />
-              ) : (
+              {course?.enrollmentCourse[0].student_id === session?.id ? (
                 <Link
                   href={`/student/courses/${course.id}`}
                   className="inline-block w-full"
@@ -97,6 +93,11 @@ export default async function Page({
                     <ArrowRightCircle className="h-4 w-4 mr-1" /> Go to course
                   </Button>
                 </Link>
+              ) : (
+                <EnrollmentCourse
+                  courseId={course.id as string}
+                  studentId={session?.id as string}
+                />
               )}
             </div>
           </div>

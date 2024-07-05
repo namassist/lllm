@@ -21,7 +21,6 @@ import {
   ChevronUp,
   Book,
   MoreHorizontal,
-  Trash,
 } from "lucide-react";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import {

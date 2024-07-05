@@ -4,11 +4,17 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { startExam } from "@/actions/exam";
 
-export default function StartExam({ studentId, examId, isValidDay }: any) {
+export default function StartExam({
+  studentId,
+  examId,
+  isValidDay,
+  courseId,
+}: any) {
   const handleStartExam = () => {
     const startedExam = startExam({
       examId: examId,
       studentId: studentId,
+      courseId: courseId,
     });
   };
   return (

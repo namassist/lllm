@@ -15,8 +15,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { shuffleArray } from "@/lib/shuffle";
 import { submittedAnswer } from "@/actions/exam";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function Exams({ exam }: any) {
+  const router = useRouter();
   const [time, setTime] = useState(100 * 60);
   const [fontSize, setFontSize] = useState([16]);
   const [shuffledExam, setShuffledExam] = useState(null);
@@ -50,20 +53,6 @@ export default function Exams({ exam }: any) {
     if (questionElement) {
       questionElement.style.fontSize = `${fontSize}px`;
     }
-
-    const handlePopState = (event: any) => {
-      event.preventDefault();
-      alert(
-        "Tidak bisa kembali ke halaman sebelumnya selama ujian berlangsung."
-      );
-    };
-
-    window.history.pushState(null, null, window.location.href);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
   }, [fontSize]);
 
   const handleMultipleChoiceChange = (questionId: string, choiceId: string) => {
@@ -92,20 +81,27 @@ export default function Exams({ exam }: any) {
   const handleSubmit = async () => {
     const answers = {
       multipleChoice: Object.keys(multipleChoiceAnswers).map((questionId) => ({
-        attemptId: exam?.examAttempt[0]?.id,
+        attemptId: exam?.examAttempt[exam?.examAttempt?.length - 1]?.id,
         questionId,
         choiceId: multipleChoiceAnswers[questionId],
       })),
       essay: Object.keys(essayAnswers).map((questionId) => ({
-        attemptId: exam.examAttempt[0].id,
+        attemptId: exam.examAttempt[exam.examAttempt.length - 1].id,
         questionId,
         answer: essayAnswers[questionId],
       })),
-      attemptId: exam?.examAttempt[0]?.id,
+      attemptId: exam?.examAttempt[exam?.examAttempt?.length - 1]?.id,
     };
 
     try {
-      const submitted = submittedAnswer(answers);
+      const loading = toast.loading("Submitting...");
+      const submitted = await submittedAnswer(answers);
+
+      if (submitted.message) {
+        toast.dismiss(loading);
+        toast.success(submitted.message);
+        router.refresh();
+      }
     } catch (error) {
       console.log(error);
     }

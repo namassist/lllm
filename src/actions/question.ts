@@ -88,8 +88,7 @@ export const updateQuestion = async (data: any) => {
 export const createBulkQuestion = async (data: any, examId: string) => {
   try {
     const createdQuestions = await db.question.createMany({
-      data: data.map(({ id, question, score }: any) => ({
-        id,
+      data: data.map(({ question, score }: any) => ({
         question,
         score,
         exam_id: examId,
@@ -145,5 +144,5 @@ export const deleteQuestion = async (id: string) => {
     console.log(error);
   }
 
-  revalidatePath(`/admin/courses/[courseId]/exams/[examId]`);
+  revalidatePath(`/admin/courses/[courseId]/exams/[examId]`, "page");
 };

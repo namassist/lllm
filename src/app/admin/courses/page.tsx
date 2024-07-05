@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/sheet";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import { getInstructorCourses } from "@/lib/data";
+import { getCategories, getInstructorCourses } from "@/lib/data";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
   if (session?.user?.id) {
     const courses = await getInstructorCourses(session.user.id);
+    const categories = await getCategories();
 
     return (
       <AuthLayout>
@@ -42,7 +43,10 @@ export default async function Page() {
               <SheetContent side="bottom" className="rounded-t-xl h-[95vh]">
                 <div className="h-2 w-40 bg-foreground/10 opacity-40 mx-auto rounded-full mb-5"></div>
                 <SheetHeader className="container">
-                  <AddCourse instructor_id={session?.user?.id} />
+                  <AddCourse
+                    instructor_id={session?.user?.id}
+                    categories={categories}
+                  />
                 </SheetHeader>
               </SheetContent>
             </Sheet>

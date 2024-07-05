@@ -77,6 +77,20 @@ export const getInstructorCourses = async (id: string) => {
   }
 };
 
+export const getCategories = async () => {
+  try {
+    const result = await db.categories.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+    return result;
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+};
+
 export const getTopicByCourse = async (id: string) => {
   try {
     const result = await db.topics.findFirst({

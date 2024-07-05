@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format, isSameDay, isAfter } from "date-fns";
+import { isSameDay, isAfter } from "date-fns";
 
 // actions
 import { getExamById, startExam } from "@/actions/exam";
@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { getSession } from "@/lib/session";
 import StartExam from "@/components/forms/start-exam";
 import Exams from "@/components/exams";
+import { formatDate } from "@/lib/date";
 
 interface PageProps {
   params: { examId: string; courseId: string };
@@ -34,11 +35,8 @@ export default async function Page({ params }: PageProps) {
     const isValidDay =
       isSameDay(today, heldAtDate) || isAfter(today, heldAtDate);
 
-    const formatDate = (dateString: Date) => {
-      return format(exam?.examAttempt[0]?.updatedAt, "dd MMM yyyy HH:mm");
-    };
-
-    if (exam?.examAttempt[0]?.isActive) {
+    console.log(exam?.examAttempt);
+    if (exam?.examAttempt[exam?.examAttempt.length - 1]?.isActive) {
       return <Exams exam={exam} />;
     }
 
@@ -62,13 +60,18 @@ export default async function Page({ params }: PageProps) {
             <li className="ml-4">Syarat nilai kelulusan : 75%</li>
           </ul>
           <p>Selamat Mengerjakan!</p>
-          {exam?.examAttempt.length === 0 && (
+
+          {exam?.examAttempt.filter(
+            (attempt) => attempt.student_id === session?.id
+          ).length < 3 && (
             <StartExam
+              courseId={params.courseId}
               studentId={session?.id}
               examId={exam?.id}
               isValidDay={isValidDay}
             />
           )}
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -79,22 +82,24 @@ export default async function Page({ params }: PageProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {exam?.examAttempt.map((ex) => (
-                <TableRow key={ex.id}>
-                  <TableCell className="font-medium">
-                    {formatDate(ex.createdAt)}
-                  </TableCell>
-                  <TableCell>{ex.score} ??</TableCell>
-                  <TableCell>
-                    <Badge variant="outlinePrimary">review</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="outline" className="text-xs">
-                      Lihat Detail
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {exam?.examAttempt
+                .filter((attempt) => attempt.student_id === session?.id)
+                .map((ex) => (
+                  <TableRow key={ex.id}>
+                    <TableCell className="font-medium">
+                      {formatDate(ex.createdAt)}
+                    </TableCell>
+                    <TableCell>{ex.score}</TableCell>
+                    <TableCell>
+                      <Badge variant="outlinePrimary">review</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        Lihat Detail
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>

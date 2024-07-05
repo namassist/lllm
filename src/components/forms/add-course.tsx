@@ -27,7 +27,7 @@ const initialState = {
   message: "",
 };
 
-export default function AddCourse({ instructor_id }: any) {
+export default function AddCourse({ instructor_id, categories }: any) {
   const { toast } = useToast();
   const [state, formAction] = useFormState(saveCourse, initialState);
   const [selectedStatus, setSelectedStatus] = React.useState("");
@@ -96,8 +96,11 @@ export default function AddCourse({ instructor_id }: any) {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1ab1">Category A</SelectItem>
-                  <SelectItem value="2cd2">Category B</SelectItem>
+                  {categories?.map((category: any) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <input

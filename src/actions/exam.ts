@@ -4,6 +4,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { openai } from "@ai-sdk/openai";
+import { cosineSimilarity, embedMany } from "ai";
 
 const ExamSchema = z.object({
   name: z.string().min(6),
@@ -72,7 +74,12 @@ export const getExamById = async (id: string) => {
           },
         },
         course: true,
-        examAttempt: true,
+        examAttempt: {
+          orderBy: { createdAt: "asc" },
+          include: {
+            student: true,
+          },
+        },
       },
     });
     return result;
@@ -82,7 +89,6 @@ export const getExamById = async (id: string) => {
 };
 
 export const startExam = async (data: any) => {
-  console.log(data);
   try {
     const result = await db.examAttempt.create({
       data: {
@@ -104,7 +110,7 @@ export const submittedAnswer = async (data: any) => {
   try {
     const { multipleChoice, essay, attemptId } = data;
 
-    //tambahkan data multipleChoice
+    // Tambahkan data multipleChoice
     const multipleChoicePromises = multipleChoice.map((answer: any) => {
       return db.multipleChoiceAnswer.create({
         data: {
@@ -115,30 +121,89 @@ export const submittedAnswer = async (data: any) => {
       });
     });
 
-    //tambahkan data answer
-    const essayPromises = essay.map((answer: any) => {
-      return db.essayAnswer.create({
-        data: {
-          attempt_id: answer.attemptId,
-          question_id: answer.questionId,
-          answer: answer.answer,
-          score: 0,
+    // Tambahkan data essay
+    const essayAnswers = await Promise.all(
+      essay.map((answer: any) => {
+        return db.essayAnswer.create({
+          data: {
+            attempt_id: answer.attemptId,
+            question_id: answer.questionId,
+            answer: answer.answer,
+            score: 0,
+          },
+        });
+      })
+    );
+
+    await Promise.all(multipleChoicePromises);
+
+    let totalScore = 0;
+    for (const answer of multipleChoice) {
+      const question = await db.question.findUnique({
+        where: { id: answer.questionId },
+        select: {
+          score: true,
+          choice: {
+            select: {
+              id: true,
+              is_correct: true,
+            },
+          },
         },
       });
-    });
 
-    await Promise.all([...multipleChoicePromises, ...essayPromises]);
+      if (!question) continue;
 
-    // update status examAttempt
+      const correctChoice = question.choice.find((ch) => ch.is_correct);
+
+      if (correctChoice && correctChoice.id === answer.choiceId) {
+        totalScore += question.score;
+      }
+    }
+
+    // Penilaian jawaban essay menggunakan embeddings
+    for (const [index, answer] of essayAnswers.entries()) {
+      const question = await db.question.findUnique({
+        where: { id: essay[index].questionId },
+        select: {
+          score: true,
+          choice: {
+            where: {
+              is_correct: true,
+            },
+          },
+        },
+      });
+
+      if (!question) continue;
+
+      const { embeddings } = await embedMany({
+        model: openai.embedding("text-embedding-3-small"), // Pastikan model ini tersedia dalam library
+        values: [essay[index].answer, question.choice[0].choice],
+      });
+
+      const similarity = cosineSimilarity(embeddings[0], embeddings[1]);
+      const essayScore = Math.round(similarity * question.score); // Membulatkan ke integer
+
+      totalScore += essayScore;
+
+      await db.essayAnswer.update({
+        where: { id: answer.id },
+        data: { score: essayScore },
+      });
+    }
+
+    // Update status examAttempt
     await db.examAttempt.update({
       where: { id: attemptId },
-      data: { isActive: false },
+      data: { isActive: false, score: totalScore },
     });
+
+    return { message: "success submitted answer" };
   } catch (error) {
+    console.error("Failed to fetch data", error);
     throw new Error("Failed to fetch data");
   }
-
-  redirect(`/student/courses/e91aa550-1e4d-4193-894a-e5506bae4d96`);
 };
 
 export const deleteExam = async (id: string) => {
