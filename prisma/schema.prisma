@@ -214,13 +214,21 @@ model ExamAttempt {
   finished_at DateTime
   score Int?
   isActive Boolean
-  feedback String @db.Text
+  status StatusExamAttempt? @default(draft)
+  feedback String? @db.Text
+  advantage String? @db.Text
+  disadvantage String? @db.Text
   essayAnswer EssayAnswer[]
   multiplechoiceAnswer MultipleChoiceAnswer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@map("exam_attempts")
+}
+
+enum StatusExamAttempt {
+  draft
+  publish
 }
 
 model EssayAnswer {

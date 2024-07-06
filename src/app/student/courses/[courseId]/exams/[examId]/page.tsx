@@ -35,7 +35,6 @@ export default async function Page({ params }: PageProps) {
     const isValidDay =
       isSameDay(today, heldAtDate) || isAfter(today, heldAtDate);
 
-    console.log(exam?.examAttempt);
     if (exam?.examAttempt[exam?.examAttempt.length - 1]?.isActive) {
       return <Exams exam={exam} />;
     }
@@ -94,9 +93,11 @@ export default async function Page({ params }: PageProps) {
                       <Badge variant="outlinePrimary">review</Badge>
                     </TableCell>
                     <TableCell>
+                      {ex?.status === "publish" && 
                       <Button size="sm" variant="outline" className="text-xs">
                         Lihat Detail
                       </Button>
+                      }
                     </TableCell>
                   </TableRow>
                 ))}

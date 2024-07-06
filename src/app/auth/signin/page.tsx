@@ -65,6 +65,7 @@ export default function Login() {
         setIsLoading(false);
       }
     } catch (error) {
+      console.log(error.message)
       setIsLoading(false);
     } finally {
       const session = await getSession();
