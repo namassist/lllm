@@ -43,9 +43,11 @@ import {
 } from "@/components/ui/popover";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import AddExams from "@/components/forms/add-exams";
 import { deleteExam } from "@/actions/exam";
 import { deleteTopic } from "@/actions/topic";
+import AddExams from "@/components/forms/add-exams";
+import Participants from "./(tabs)/participants";
+import Grades from "./(tabs)/grades";
 
 interface TabProps {
   tab: string;
@@ -81,7 +83,7 @@ export default async function Page({ searchParams, params }: PageProps) {
   return (
     <AuthLayout>
       <div className="flex gap-4">
-        <div className="w-full lg:w-8/12 space-y-5">
+        <div className="w-full lg:w-10/12 space-y-5">
           <Card>
             <div className="relative text-gray-100 font-semibold">
               <CardImage
@@ -132,7 +134,7 @@ export default async function Page({ searchParams, params }: PageProps) {
             </div>
           </Card>
           <Tabs defaultValue={currentTab} className="space-y-5">
-            <TabsList className="w-full lg:w-8/12 grid grid-cols-5">
+            <TabsList className="w-full lg:w-10/12 grid grid-cols-5">
               <TabsTrigger value="courses" asChild>
                 <Link href={{ query: { tab: "courses" } }}>Courses</Link>
               </TabsTrigger>
@@ -253,20 +255,20 @@ export default async function Page({ searchParams, params }: PageProps) {
               <p>Tab Discussions</p>
             </TabsContent>
             <TabsContent value="grades">
-              <p>Tab Grades</p>
+              <Grades courseId={params?.courseId} />
             </TabsContent>
             <TabsContent value="students">
-              <p>Tab Participants</p>
+              <Participants students={data?.enrollmentCourse} />
             </TabsContent>
             <TabsContent value="settings">
               <p>Tab Settings</p>
             </TabsContent>
           </Tabs>
         </div>
-        <div className="w-full lg:w-4/12">
+        <div className="w-full lg:w-2/12">
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl">Materials Course</CardTitle>
+              <CardTitle className="text-lg">Materials Course</CardTitle>
             </CardHeader>
             <CardContent>
               <NavigationMenu>

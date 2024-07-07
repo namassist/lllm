@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { openai } from "@ai-sdk/openai";
-import { generateText, generateObject } from 'ai';
+import { generateText, generateObject } from "ai";
 
 const ExamSchema = z.object({
   name: z.string().min(6),
@@ -15,9 +15,17 @@ const ExamSchema = z.object({
 });
 
 const FeedbackSchema = z.object({
-  ringkasan: z.string().describe("ringkasan peserta didik dalam mengikuti ujian"),
-  kelebihan: z.string().describe("kelebihan peserta didik dalam mengikuti ujian"),
-  peningkatan: z.string().describe("aspek yang perlu ditingkatkan peserta didik dalam mengikuti ujian"),
+  ringkasan: z
+    .string()
+    .describe("ringkasan peserta didik dalam mengikuti ujian"),
+  kelebihan: z
+    .string()
+    .describe("kelebihan peserta didik dalam mengikuti ujian"),
+  peningkatan: z
+    .string()
+    .describe(
+      "aspek yang perlu ditingkatkan peserta didik dalam mengikuti ujian"
+    ),
 });
 
 export const createExam = async (courseId: string) => {
@@ -80,12 +88,6 @@ export const getExamById = async (id: string) => {
           },
         },
         course: true,
-        examAttempt: {
-          orderBy: { createdAt: "asc" },
-          include: {
-            student: true,
-          },
-        },
       },
     });
     return result;
@@ -94,14 +96,18 @@ export const getExamById = async (id: string) => {
   }
 };
 
-export const getExamAttempt = async () => {
+export const getExamAttempt = async (id?: string) => {
   try {
+    const whereCondition = id ? { exam: { id: id } } : {};
+
     const examData = await db.examAttempt.findMany({
+      where: whereCondition,
+      orderBy: { createdAt: "asc" },
       include: {
         student: {
           include: {
-            user: true
-          }
+            user: true,
+          },
         },
         exam: {
           include: {
@@ -125,34 +131,63 @@ export const getExamAttempt = async () => {
         },
       },
     });
-  
-    const organizedData = examData.map(attempt => {
-      const questionsWithAnswers = attempt.exam.question.map(question => {
-        const mcAnswer = attempt.multiplechoiceAnswer.find(mc => mc.question_id === question.id);
-        const essayAnswer = attempt.essayAnswer.find(es => es.question_id === question.id);
-  
-        const correctChoice = question.choice.find(choice => choice.is_correct);
-        const questionType = mcAnswer ? 'multiple choice' : essayAnswer ? 'essay' : 'unknown';
-  
+
+    const organizedData = examData.map((attempt) => {
+      const questionsWithAnswers = attempt.exam.question.map((question) => {
+        const mcAnswer = attempt.multiplechoiceAnswer.find(
+          (mc) => mc.question_id === question.id
+        );
+        const essayAnswer = attempt.essayAnswer.find(
+          (es) => es.question_id === question.id
+        );
+
+        const correctChoice = question.choice.find(
+          (choice) => choice.is_correct
+        );
+        const questionType = mcAnswer
+          ? "multiple choice"
+          : essayAnswer
+          ? "essay"
+          : "unknown";
+
         return {
           questionId: question.id,
           questionText: question.question,
           questionScore: question.score,
           questionType: questionType,
-          correctAnswer: correctChoice ? correctChoice.choice : 'Essay Answer Required',
-          studentAnswer: mcAnswer ? mcAnswer.choice.choice : essayAnswer ? essayAnswer.answer : 'No Answer',
-          studentScore: mcAnswer ? (mcAnswer.choice_id === correctChoice?.id ? question.score : 0) : essayAnswer ? essayAnswer.score : 0,
+          correctAnswer: correctChoice
+            ? correctChoice.choice
+            : "Essay Answer Required",
+          studentAnswer: mcAnswer
+            ? mcAnswer.choice.choice
+            : essayAnswer
+            ? essayAnswer.answer
+            : "No Answer",
+          studentScore: mcAnswer
+            ? mcAnswer.choice_id === correctChoice?.id
+              ? question.score
+              : 0
+            : essayAnswer
+            ? essayAnswer.score
+            : 0,
         };
       });
 
-      const totalPossiblePoints = questionsWithAnswers.reduce((total, q) => total + q.questionScore, 0);
-      const totalQuestionsAnswered = questionsWithAnswers.filter(q => q.studentAnswer !== 'No Answer').length;
-  
+      const totalPossiblePoints = questionsWithAnswers.reduce(
+        (total, q) => total + q.questionScore,
+        0
+      );
+      const totalQuestionsAnswered = questionsWithAnswers.filter(
+        (q) => q.studentAnswer !== "No Answer"
+      ).length;
+
       return {
         attemptId: attempt.id,
+        studentId: attempt.student.id,
         fullname: attempt.student.fullname,
         status: attempt.status,
         email: attempt.student.user.email,
+        isActive: attempt.isActive,
         feedback: attempt.feedback,
         advantage: attempt.advantage,
         disadvantage: attempt.disadvantage,
@@ -221,28 +256,37 @@ export const submittedAnswer = async (data: any) => {
     ]);
 
     // Penilaian jawaban multiple-choice
-    const multipleChoiceScoresPromises = multipleChoice.map(async (answer:any) => {
-      const question = await db.question.findUnique({
-        where: { id: answer.questionId },
-        select: {
-          score: true,
-          choice: {
-            select: {
-              id: true,
-              is_correct: true,
+    const multipleChoiceScoresPromises = multipleChoice.map(
+      async (answer: any) => {
+        const question = await db.question.findUnique({
+          where: { id: answer.questionId },
+          select: {
+            score: true,
+            choice: {
+              select: {
+                id: true,
+                is_correct: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (!question) return 0;
+        if (!question) return 0;
 
-      const correctChoice = question.choice.find((ch) => ch.is_correct);
-      return correctChoice && correctChoice.id === answer.choiceId ? question.score : 0;
-    });
+        const correctChoice = question.choice.find((ch) => ch.is_correct);
+        return correctChoice && correctChoice.id === answer.choiceId
+          ? question.score
+          : 0;
+      }
+    );
 
-    const multipleChoiceScores = await Promise.all(multipleChoiceScoresPromises);
-    const multipleChoiceTotalScore = multipleChoiceScores.reduce((acc, score) => acc + score, 0);
+    const multipleChoiceScores = await Promise.all(
+      multipleChoiceScoresPromises
+    );
+    const multipleChoiceTotalScore = multipleChoiceScores.reduce(
+      (acc, score) => acc + score,
+      0
+    );
 
     // Penilaian jawaban essay menggunakan embeddings
     const essayScoresPromises = essayAnswers.map(async (answer, index) => {
@@ -326,25 +370,47 @@ export const submittedAnswer = async (data: any) => {
       examName: examData.exam.name,
       totalScore: examData.score,
       questionsWithAnswers: examData.exam.question.map((question) => {
-        const mcAnswer = examData.multiplechoiceAnswer.find((mc) => mc.question_id === question.id);
-        const essayAnswer = examData.essayAnswer.find((es) => es.question_id === question.id);
+        const mcAnswer = examData.multiplechoiceAnswer.find(
+          (mc) => mc.question_id === question.id
+        );
+        const essayAnswer = examData.essayAnswer.find(
+          (es) => es.question_id === question.id
+        );
 
-        const correctChoice = question.choice.find((choice) => choice.is_correct);
+        const correctChoice = question.choice.find(
+          (choice) => choice.is_correct
+        );
 
         return {
           questionId: question.id,
           questionText: question.question,
           questionScore: question.score,
-          correctAnswer: correctChoice ? correctChoice.choice : 'Essay Answer Required',
-          studentAnswer: mcAnswer ? mcAnswer.choice.choice : essayAnswer ? essayAnswer.answer : 'No Answer',
-          studentScore: mcAnswer ? (mcAnswer.choice_id === correctChoice?.id ? question.score : 0) : essayAnswer ? essayAnswer.score : 0,
+          correctAnswer: correctChoice
+            ? correctChoice.choice
+            : "Essay Answer Required",
+          studentAnswer: mcAnswer
+            ? mcAnswer.choice.choice
+            : essayAnswer
+            ? essayAnswer.answer
+            : "No Answer",
+          studentScore: mcAnswer
+            ? mcAnswer.choice_id === correctChoice?.id
+              ? question.score
+              : 0
+            : essayAnswer
+            ? essayAnswer.score
+            : 0,
         };
       }),
     };
 
     const result = await generateObject({
       model: openai("gpt-4o"),
-      prompt: `Berikan umpan balik mengenai kinerja seorang siswa dalam ujian ${examData?.exam?.course?.title} baru-baru ini. Umpan balik harus mencakup ringkasan kinerja keseluruhan siswa, menyoroti kelebihan dan area yang perlu ditingkatkan. Berikut ini adalah hasil ujian siswa: \n ${JSON.stringify(organizedData)}`,
+      prompt: `Berikan umpan balik mengenai kinerja seorang siswa dalam ujian ${
+        examData?.exam?.course?.title
+      } baru-baru ini. Umpan balik harus mencakup ringkasan kinerja keseluruhan siswa, menyoroti kelebihan dan area yang perlu ditingkatkan. Berikut ini adalah hasil ujian siswa: \n ${JSON.stringify(
+        organizedData
+      )}`,
       schema: FeedbackSchema,
     });
 
@@ -371,17 +437,16 @@ export const updateStatusExamAttempt = async (id: string) => {
     await db.examAttempt.update({
       where: { id: id },
       data: {
-        status: "publish"
+        status: "publish",
       },
     });
   } catch (error) {
     console.log(error);
   }
 
-  revalidatePath('/admin/courses/[courseId]/exams/[examId]', "page");
+  revalidatePath("/admin/courses/[courseId]/exams/[examId]", "page");
   return { message: "feedback published" };
 };
-
 
 export const deleteExam = async (id: string) => {
   let result;

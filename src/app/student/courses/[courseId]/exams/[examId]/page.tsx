@@ -13,21 +13,25 @@ import {
 import { isSameDay, isAfter } from "date-fns";
 
 // actions
-import { getExamById, startExam } from "@/actions/exam";
+import { getExamAttempt, getExamById, startExam } from "@/actions/exam";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getSession } from "@/lib/session";
 import StartExam from "@/components/forms/start-exam";
 import Exams from "@/components/exams";
 import { formatDate } from "@/lib/date";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import SheetLayout from "@/components/layouts/SheetLayout";
+import ResultExam from "@/components/exams/result";
 
 interface PageProps {
   params: { examId: string; courseId: string };
 }
 
 export default async function Page({ params }: PageProps) {
-  const exam = await getExamById(params.examId);
   const session = await getSession();
+  const exam = await getExamById(params.examId);
+  const examAttempt = await getExamAttempt(params.examId);
 
   if (exam && session) {
     const today = new Date();
@@ -35,8 +39,13 @@ export default async function Page({ params }: PageProps) {
     const isValidDay =
       isSameDay(today, heldAtDate) || isAfter(today, heldAtDate);
 
-    if (exam?.examAttempt[exam?.examAttempt.length - 1]?.isActive) {
-      return <Exams exam={exam} />;
+    if (examAttempt[examAttempt.length - 1]?.isActive) {
+      return (
+        <Exams
+          exam={exam}
+          attemptId={examAttempt[examAttempt.length - 1].attemptId}
+        />
+      );
     }
 
     return (
@@ -48,8 +57,8 @@ export default async function Page({ params }: PageProps) {
             kuliah {exam?.course?.title}.
           </p>
           <p>
-            Terdapat {exam?.question.length} pertanyaan yang harus dikerjakan
-            dalam ujian ini. Beberapa ketentuannya sebagai berikut:
+            Terdapat beberapa pertanyaan yang harus dikerjakan dalam ujian ini.
+            Beberapa ketentuannya sebagai berikut:
           </p>
           <ul className="list-disc list-inside space-y-2">
             <li className="ml-4">
@@ -60,9 +69,8 @@ export default async function Page({ params }: PageProps) {
           </ul>
           <p>Selamat Mengerjakan!</p>
 
-          {exam?.examAttempt.filter(
-            (attempt) => attempt.student_id === session?.id
-          ).length < 3 && (
+          {examAttempt.filter((attempt) => attempt.studentId === session?.id)
+            .length < 3 && (
             <StartExam
               courseId={params.courseId}
               studentId={session?.id}
@@ -70,34 +78,53 @@ export default async function Page({ params }: PageProps) {
               isValidDay={isValidDay}
             />
           )}
-
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Tanggal</TableHead>
-                <TableHead>Score</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Score</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {exam?.examAttempt
-                .filter((attempt) => attempt.student_id === session?.id)
+              {examAttempt
+                .filter((attempt) => attempt.studentId === session?.id)
                 .map((ex) => (
-                  <TableRow key={ex.id}>
+                  <TableRow key={ex.attemptId}>
                     <TableCell className="font-medium">
                       {formatDate(ex.createdAt)}
                     </TableCell>
-                    <TableCell>{ex.score}</TableCell>
                     <TableCell>
-                      <Badge variant="outlinePrimary">review</Badge>
+                      <Badge
+                        className={
+                          ex?.status === "draft"
+                            ? "bg-yellow-500"
+                            : "bg-green-500"
+                        }
+                      >
+                        {ex?.status === "draft" ? "On Review" : "Reviewed"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      {ex?.status === "publish" && 
-                      <Button size="sm" variant="outline" className="text-xs">
-                        Lihat Detail
-                      </Button>
-                      }
+                      {ex?.status === "draft" ? "??" : ex.score}
+                    </TableCell>
+                    <TableCell>
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button
+                            disabled={ex?.status === "draft" ? true : false}
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            Lihat Detail
+                          </Button>
+                        </SheetTrigger>
+                        <SheetLayout>
+                          <ResultExam examAttempt={ex} />
+                        </SheetLayout>
+                      </Sheet>
                     </TableCell>
                   </TableRow>
                 ))}

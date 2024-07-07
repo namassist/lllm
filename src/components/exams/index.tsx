@@ -18,9 +18,9 @@ import { submittedAnswer } from "@/actions/exam";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-export default function Exams({ exam }: any) {
+export default function Exams({ exam, attemptId }: any) {
   const router = useRouter();
-  const [time, setTime] = useState(100 * 60);
+  const [time, setTime] = useState(100 * exam?.duration);
   const [fontSize, setFontSize] = useState([16]);
   const [shuffledExam, setShuffledExam] = useState(null);
   const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState({});
@@ -81,25 +81,25 @@ export default function Exams({ exam }: any) {
   const handleSubmit = async () => {
     const answers = {
       multipleChoice: Object.keys(multipleChoiceAnswers).map((questionId) => ({
-        attemptId: exam?.examAttempt[exam?.examAttempt?.length - 1]?.id,
+        attemptId: attemptId,
         questionId,
         choiceId: multipleChoiceAnswers[questionId],
       })),
       essay: Object.keys(essayAnswers).map((questionId) => ({
-        attemptId: exam.examAttempt[exam.examAttempt.length - 1].id,
+        attemptId: attemptId,
         questionId,
         answer: essayAnswers[questionId],
       })),
-      attemptId: exam?.examAttempt[exam?.examAttempt?.length - 1]?.id,
+      attemptId: attemptId,
     };
 
     try {
       const loading = toast.loading("Submitting...");
       const submitted = await submittedAnswer(answers);
 
-      if (submitted.message) {
+      if (submitted?.message) {
         toast.dismiss(loading);
-        toast.success(submitted.message);
+        toast.success(submitted?.message);
         router.refresh();
       }
     } catch (error) {

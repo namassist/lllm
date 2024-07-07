@@ -13,10 +13,10 @@ import SheetLayout from "@/components/layouts/SheetLayout";
 import GenerateQuiz from "@/components/forms/generate-quiz";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import QuestionCard from "@/components/cards/question";
+import Results from "./(tabs)/results";
 
 // actions
 import { getExamById } from "@/actions/exam";
-import Results from "./(tabs)/results";
 
 interface PageProps {
   params: { examId: string; courseId: string };

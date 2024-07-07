@@ -137,3 +137,98 @@ export const enrollmentCourse = async (data: any) => {
   revalidateTag(`/student/courses/${data.student_id}/preview`);
   return { message: "successfully enrollment course" };
 };
+
+type ExamScoreTable = {
+  tableHeaders: string[];
+  tableRows: (string | number)[][];
+};
+
+type ExamAttemptWithDetails = {
+  studentName: string;
+  examName: string;
+  score: number;
+};
+
+type OrganizedData = {
+  [studentName: string]: {
+    [examName: string]: number;
+  };
+};
+
+export const getStudentExamGradeByCourse = async (
+  courseId: string
+): Promise<ExamScoreTable | undefined> => {
+  try {
+    const examAttemptsFromDb = await db.examAttempt.findMany({
+      where: {
+        exam: {
+          course: {
+            id: courseId,
+          },
+        },
+      },
+      select: {
+        score: true,
+        student: {
+          select: {
+            fullname: true,
+          },
+        },
+        exam: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Konversi data ke dalam bentuk yang diharapkan oleh ExamAttemptWithDetails
+    const examAttempts: ExamAttemptWithDetails[] = examAttemptsFromDb.map(
+      (attempt) => ({
+        studentName: attempt.student.fullname,
+        examName: attempt.exam.name,
+        score: attempt.score ?? 0, // Atur ke 0 jika nilai null
+      })
+    );
+
+    if (examAttempts.length === 0) {
+      return undefined; // Tambahkan return undefined
+    }
+
+    const organizedData: OrganizedData = {};
+
+    examAttempts.forEach((attempt) => {
+      const studentName = attempt.studentName;
+      const examName = attempt.examName;
+      const score = attempt.score;
+
+      if (!organizedData[studentName]) {
+        organizedData[studentName] = {};
+      }
+      organizedData[studentName][examName] = score;
+    });
+
+    const examNames = [
+      ...new Set(examAttempts.map((attempt) => attempt.examName)),
+    ];
+
+    const tableData: string[][] = Object.entries(organizedData).map(
+      ([studentName, exams]) => {
+        const row = [studentName];
+        examNames.forEach((examName) => {
+          row.push((exams[examName] ?? "N/A").toString()); // Konversi ke string
+        });
+        return row;
+      }
+    );
+
+    const tableHeaders = ["Student", ...examNames];
+
+    return {
+      tableHeaders,
+      tableRows: tableData,
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
