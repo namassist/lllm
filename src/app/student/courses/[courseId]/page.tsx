@@ -39,20 +39,10 @@ export default async function Page({ searchParams, params }: PageProps) {
     redirect("/student/courses");
   }
 
-  let currentTab = searchParams.tab ?? "courses";
-  if (
-    currentTab !== "discussions" &&
-    currentTab !== "grades" &&
-    currentTab !== "students" &&
-    currentTab !== "settings"
-  ) {
-    currentTab = "courses";
-  }
-
   return (
     <AuthLayout isStudent>
       <div className="flex gap-4">
-        <div className="w-full lg:w-8/12 space-y-5">
+        <div className="w-full lg:w-10/12 space-y-5">
           <Card>
             <div className="relative text-gray-100 font-semibold">
               <CardImage
@@ -102,83 +92,50 @@ export default async function Page({ searchParams, params }: PageProps) {
               </div>
             </div>
           </Card>
-          <Tabs defaultValue={currentTab} className="space-y-5">
-            <TabsList className="w-full lg:w-8/12 grid grid-cols-5">
-              <TabsTrigger value="courses" asChild>
-                <Link href={{ query: { tab: "courses" } }}>Courses</Link>
-              </TabsTrigger>
-              <TabsTrigger value="discussions" asChild>
-                <Link href={{ query: { tab: "discussions" } }}>
-                  Discussions
-                </Link>
-              </TabsTrigger>
-              <TabsTrigger value="grades" asChild>
-                <Link href={{ query: { tab: "grades" } }}>Grades</Link>
-              </TabsTrigger>
-              <TabsTrigger value="students" asChild>
-                <Link href={{ query: { tab: "students" } }}>Participants</Link>
-              </TabsTrigger>
-              <TabsTrigger value="settings" asChild>
-                <Link href={{ query: { tab: "settings" } }}>Settings</Link>
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="courses" className="space-y-5">
-              {data?.topics?.map((topic, index) => (
-                <Card key={topic.id} id={topic.id} className="w-full relative">
-                  <CardHeader>
-                    <CardTitle>Chapter {index + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Card>
-                      <CardContent className="p-4 flex gap-3 items-center">
-                        <Book className="h-7 w-7" />
-                        <Link
-                          href={`/student/courses/${params.courseId}/topics/${topic.id}`}
-                          className="hover:opacity-50 cursor-pointer"
-                        >
-                          <p>{topic.title}</p>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  </CardContent>
-                </Card>
-              ))}
-              {data?.exam?.map((exam) => (
-                <Card key={exam.id} className="w-full relative">
-                  <CardHeader>
-                    <CardTitle>{exam.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Card>
-                      <CardContent className="p-4">
-                        <Link
-                          href={`/student/courses/${params.courseId}/exams/${exam.id}`}
-                          className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
-                        >
-                          <BookUser className="h-7 w-7" />
-                          <p>{exam.name}</p>
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-            <TabsContent value="discussions">
-              <p>Tab Discussions</p>
-            </TabsContent>
-            <TabsContent value="grades">
-              <p>Tab Grades</p>
-            </TabsContent>
-            <TabsContent value="students">
-              <p>Tab Participants</p>
-            </TabsContent>
-            <TabsContent value="settings">
-              <p>Tab Settings</p>
-            </TabsContent>
-          </Tabs>
+          <div className="space-y-5">
+            {data?.topics?.map((topic, index) => (
+              <Card key={topic.id} id={topic.id} className="w-full relative">
+                <CardHeader>
+                  <CardTitle>Chapter {index + 1}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Card>
+                    <CardContent className="p-4 flex gap-3 items-center">
+                      <Book className="h-7 w-7" />
+                      <Link
+                        href={`/student/courses/${params.courseId}/topics/${topic.id}`}
+                        className="hover:opacity-50 cursor-pointer"
+                      >
+                        <p>{topic.title}</p>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            ))}
+            {data?.exam?.map((exam) => (
+              <Card key={exam.id} className="w-full relative">
+                <CardHeader>
+                  <CardTitle>{exam.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Card>
+                    <CardContent className="p-4">
+                      <Link
+                        href={`/student/courses/${params.courseId}/exams/${exam.id}`}
+                        className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
+                      >
+                        <BookUser className="h-7 w-7" />
+                        <p>{exam.name}</p>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="w-full lg:w-4/12">
+        <div className="w-full lg:w-2/12">
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">Materials Course</CardTitle>

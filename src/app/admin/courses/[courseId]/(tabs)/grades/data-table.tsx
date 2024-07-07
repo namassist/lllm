@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import * as XLSX from "xlsx";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { CardTitle } from "@/components/ui/card";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -23,16 +26,74 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+  newColumns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
+export type Students = {
+  id: string;
+  student: string;
+  [key: string]: any;
+};
+
 export function DataTable<TData, TValue>({
-  columns,
+  newColumns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const examColumns: ColumnDef<Students>[] = newColumns.map((exam: any) => {
+    if (exam === "Student") {
+      return {
+        accessorKey: "student",
+        header: "Student",
+        cell: ({ row }) => {
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="https://github.com/namassist.png" />
+                <AvatarFallback>{row.original.student}</AvatarFallback>
+              </Avatar>
+              <CardTitle>{row.original.student}</CardTitle>
+            </div>
+          );
+        },
+      };
+    } else {
+      return {
+        accessorKey: exam,
+        header: exam,
+      };
+    }
+  });
+
+  const columns: ColumnDef<Students>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+    },
+    ,
+    ...examColumns,
+  ];
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -56,19 +117,31 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const handleExport = () => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "DataTable");
+    XLSX.writeFile(wb, "Rekapitulasi Nilai.xlsx");
+  };
+
   return (
     <div>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter name..."
-          value={
-            (table.getColumn("fullname")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("fullname")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+      <div className="flex justify-between items-center py-4">
+        <div className="flex items-center">
+          <Input
+            placeholder="Filter name..."
+            value={
+              (table.getColumn("fullname")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("fullname")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExport}>
+          Export to Excel
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>

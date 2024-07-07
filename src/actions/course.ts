@@ -98,8 +98,9 @@ export const getCoursesById = async (id: string) => {
         topics: {
           orderBy: { createdAt: "asc" },
         },
-        exam: true,
-        discussion: true,
+        exam: {
+          orderBy: { createdAt: "asc" },
+        },
         enrollmentCourse: true,
       },
     });
@@ -138,95 +139,51 @@ export const enrollmentCourse = async (data: any) => {
   return { message: "successfully enrollment course" };
 };
 
-type ExamScoreTable = {
-  tableHeaders: string[];
-  tableRows: (string | number)[][];
-};
-
-type ExamAttemptWithDetails = {
-  studentName: string;
-  examName: string;
-  score: number;
-};
-
-type OrganizedData = {
-  [studentName: string]: {
-    [examName: string]: number;
-  };
-};
-
-export const getStudentExamGradeByCourse = async (
-  courseId: string
-): Promise<ExamScoreTable | undefined> => {
+export const getStudentExamGradeByCourse = async (courseId: string) => {
   try {
-    const examAttemptsFromDb = await db.examAttempt.findMany({
-      where: {
-        exam: {
-          course: {
-            id: courseId,
-          },
-        },
-      },
-      select: {
+    const exams = await db.exam.findMany({
+      where: { course_id: courseId },
+      select: { id: true, name: true },
+    });
+
+    const examScores = await db.examAttempt.groupBy({
+      by: ["student_id", "exam_id"],
+      where: { exam: { course_id: courseId } },
+      _max: {
         score: true,
-        student: {
+      },
+    });
+
+    const students = await db.student.findMany({
+      include: {
+        user: {
           select: {
-            fullname: true,
-          },
-        },
-        exam: {
-          select: {
-            name: true,
+            username: true,
           },
         },
       },
     });
 
-    // Konversi data ke dalam bentuk yang diharapkan oleh ExamAttemptWithDetails
-    const examAttempts: ExamAttemptWithDetails[] = examAttemptsFromDb.map(
-      (attempt) => ({
-        studentName: attempt.student.fullname,
-        examName: attempt.exam.name,
-        score: attempt.score ?? 0, // Atur ke 0 jika nilai null
-      })
-    );
-
-    if (examAttempts.length === 0) {
-      return undefined; // Tambahkan return undefined
-    }
-
-    const organizedData: OrganizedData = {};
-
-    examAttempts.forEach((attempt) => {
-      const studentName = attempt.studentName;
-      const examName = attempt.examName;
-      const score = attempt.score;
-
-      if (!organizedData[studentName]) {
-        organizedData[studentName] = {};
-      }
-      organizedData[studentName][examName] = score;
+    const studentScores = students.map((student) => {
+      const scores = exams.reduce((acc, exam) => {
+        const score = examScores.find(
+          (s) => s.student_id === student.id && s.exam_id === exam.id
+        );
+        acc[exam.name] = score ? score._max.score : "N/A";
+        return acc;
+      }, {} as Record<string, any>);
+      return {
+        id: student.id,
+        student: student.user.username,
+        ...scores,
+      };
     });
 
-    const examNames = [
-      ...new Set(examAttempts.map((attempt) => attempt.examName)),
-    ];
-
-    const tableData: string[][] = Object.entries(organizedData).map(
-      ([studentName, exams]) => {
-        const row = [studentName];
-        examNames.forEach((examName) => {
-          row.push((exams[examName] ?? "N/A").toString()); // Konversi ke string
-        });
-        return row;
-      }
-    );
-
-    const tableHeaders = ["Student", ...examNames];
+    const columns = ["Student", ...exams.map((exam) => exam.name)];
 
     return {
-      tableHeaders,
-      tableRows: tableData,
+      columns,
+      data: studentScores,
     };
   } catch (error) {
     console.log(error);

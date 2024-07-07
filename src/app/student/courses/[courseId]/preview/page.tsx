@@ -30,6 +30,9 @@ export default async function Page({
   }
 
   if (course) {
+    const isEnrolled = course?.enrollmentCourse.some(
+      (c) => c.course_id === course.id && c.student_id === session?.id
+    );
     return (
       <AuthLayout isStudent>
         <div className="w-full flex gap-8 mt-10">
@@ -83,7 +86,7 @@ export default async function Page({
                 Discover a world with our comprehensive courses and take your
                 learning to the next level!
               </p>
-              {course?.enrollmentCourse[0]?.student_id === session?.id ? (
+              {isEnrolled ? (
                 <Link
                   href={`/student/courses/${course.id}`}
                   className="inline-block w-full"

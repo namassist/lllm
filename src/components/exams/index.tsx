@@ -107,6 +107,13 @@ export default function Exams({ exam, attemptId }: any) {
     }
   };
 
+  const isQuestionAnswered = (questionId: string) => {
+    return (
+      multipleChoiceAnswers.hasOwnProperty(questionId) ||
+      essayAnswers.hasOwnProperty(questionId)
+    );
+  };
+
   return (
     <main className="py-5">
       <div className="container flex gap-6 relative">
@@ -165,7 +172,14 @@ export default function Exams({ exam, attemptId }: any) {
                     href={`#question${index + 1}`}
                     className="w-[25%]"
                   >
-                    <Button variant="outline" className="rounded-none w-full">
+                    <Button
+                      variant="outline"
+                      className={`rounded-none w-full ${
+                        isQuestionAnswered(question.id)
+                          ? "bg-green-500"
+                          : "bg-red-500"
+                      }`}
+                    >
                       {index + 1}
                     </Button>
                   </Link>

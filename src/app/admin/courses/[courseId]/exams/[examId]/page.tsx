@@ -93,7 +93,7 @@ export default async function Page({ searchParams, params }: PageProps) {
             </div>
           </TabsContent>
           <TabsContent value="results" className="space-y-5">
-           <Results/>
+            <Results examId={params?.examId} />
           </TabsContent>
         </Tabs>
       </div>
