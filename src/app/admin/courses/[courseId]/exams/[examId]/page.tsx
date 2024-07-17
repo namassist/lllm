@@ -39,7 +39,7 @@ export default async function Page({ searchParams, params }: PageProps) {
       <div className="space-y-5">
         <AddExam data={exam} />
         <Tabs defaultValue={currentTab} className="space-y-5">
-          <TabsList className="w-full lg:w-2/12 grid grid-cols-2">
+          <TabsList className="w-full lg:w-3/12 grid grid-cols-2">
             <TabsTrigger value="question" asChild>
               <Link href={{ query: { tab: "question" } }}>Questions</Link>
             </TabsTrigger>

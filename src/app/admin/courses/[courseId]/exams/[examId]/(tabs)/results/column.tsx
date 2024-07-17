@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ResultExam from "@/components/exams/result";
 
 export type QuestionDetail = {
+  answerId: string;
   questionId: string;
   questionText: string;
   questionScore: number;

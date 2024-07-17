@@ -151,6 +151,11 @@ export const getExamAttempt = async (id?: string) => {
           : "unknown";
 
         return {
+          answerId: mcAnswer
+            ? mcAnswer.id
+            : essayAnswer
+            ? essayAnswer.id
+            : null,
           questionId: question.id,
           questionText: question.question,
           questionScore: question.score,
@@ -446,6 +451,86 @@ export const updateStatusExamAttempt = async (id: string) => {
 
   revalidatePath("/admin/courses/[courseId]/exams/[examId]", "page");
   return { message: "feedback published" };
+};
+
+export const updateScore = async (data: any) => {
+  try {
+    await db.essayAnswer.update({
+      where: { id: data.answerId },
+      data: {
+        score: parseInt(data.studentScore),
+      },
+    });
+
+    // Fetch the examAttempt related to the updated essayAnswer
+    const essayAnswer = await db.essayAnswer.findUnique({
+      where: { id: data.answerId },
+      include: {
+        examAttempt: {
+          include: {
+            essayAnswer: true,
+            multiplechoiceAnswer: {
+              include: {
+                choice: true,
+              },
+            },
+            exam: {
+              include: {
+                question: {
+                  include: {
+                    choice: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!essayAnswer) {
+      throw new Error("Essay answer not found");
+    }
+
+    const examAttempt = essayAnswer.examAttempt;
+
+    // Recalculate the total score for the examAttempt
+    let totalScore = 0;
+
+    // Sum the scores from essay answers
+    totalScore += examAttempt.essayAnswer.reduce(
+      (sum, answer) => sum + (answer.score || 0),
+      0
+    );
+
+    // Sum the scores from multiple choice answers
+    totalScore += examAttempt.multiplechoiceAnswer.reduce((sum, answer) => {
+      const correctChoice = answer?.question?.choice.find(
+        (choice: any) => choice.is_correct
+      );
+      return (
+        sum +
+        (answer.choice_id === correctChoice?.id ? answer.question.score : 0)
+      );
+    }, 0);
+
+    // Update the examAttempt with the new total score
+    await db.examAttempt.update({
+      where: { id: examAttempt.id },
+      data: {
+        score: totalScore,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return { message: error };
+  }
+
+  revalidatePath(
+    "/admin/courses/[courseId]/exams/[examId]?tab=results",
+    "page"
+  );
+  return { message: "score updated" };
 };
 
 export const deleteExam = async (id: string) => {

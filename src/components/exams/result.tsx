@@ -1,12 +1,71 @@
-import React from "react";
+"use client";
+
+import * as React from "react";
 import FeedbackButton from "@/components/buttons/feedbackButton";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, CircleCheck } from "lucide-react";
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { updateScore } from "@/actions/exam";
+import toast from "react-hot-toast";
 
 export default function ResultExam({ examAttempt }: { examAttempt: any }) {
+  const [editingScores, setEditingScores] = React.useState(
+    examAttempt.questionsWithAnswers.map(() => false)
+  );
+  const [editedScores, setEditedScores] = React.useState(
+    examAttempt.questionsWithAnswers.map((q: any) => q.studentScore)
+  );
+
+  const handleEditClick = (index: number) => {
+    const newEditingScores = [...editingScores];
+    newEditingScores[index] = true;
+    setEditingScores(newEditingScores);
+  };
+
+  const handleSaveClick = async (index: number) => {
+    const newEditingScores = [...editingScores];
+    newEditingScores[index] = false;
+    setEditingScores(newEditingScores);
+    const question = examAttempt.questionsWithAnswers[index];
+
+    try {
+      const loading = toast.loading("Updating Score...");
+      const updatedScore = await updateScore({
+        answerId: question.answerId,
+        questionType: question.questionType,
+        studentScore: editedScores[index],
+      });
+
+      if (updatedScore.message) {
+        toast.success(updatedScore.message);
+        toast.dismiss(loading);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleScoreChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newEditedScores = [...editedScores];
+    const newValue = parseInt(e.target.value, 10);
+
+    // Validasi untuk memastikan nilai tidak melebihi questionScore
+    if (newValue <= examAttempt.questionsWithAnswers[index].questionScore) {
+      newEditedScores[index] = newValue;
+    } else {
+      // Jika nilai melebihi questionScore, set nilai ke questionScore
+      newEditedScores[index] =
+        examAttempt.questionsWithAnswers[index].questionScore;
+    }
+
+    setEditedScores(newEditedScores);
+  };
+
   return (
     <div className="space-y-10 pt-5 pb-10">
       <div className="flex items-center justify-between">
@@ -81,7 +140,7 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
       </div>
       <div className="space-y-8">
         <CardTitle className="text-xl">Daftar Jawaban</CardTitle>
-        {examAttempt?.questionsWithAnswers.map((data: any) => (
+        {examAttempt?.questionsWithAnswers.map((data: any, index: number) => (
           <Card className="w-full" key={data.questionId}>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -107,7 +166,39 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
                   )}
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Badge variant="secondary">{data.studentScore} poin</Badge>
+                  {data.questionType !== "multiple choice" && (
+                    <>
+                      {editingScores[index] ? (
+                        <>
+                          <input
+                            type="number"
+                            value={editedScores[index]}
+                            onChange={(e) => handleScoreChange(index, e)}
+                            max={data.questionScore} // Set the max value here
+                            className="text-sm text-center"
+                          />
+                          <button
+                            onClick={() => handleSaveClick(index)}
+                            className="text-sm text-blue-500"
+                          >
+                            Simpan
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Badge variant="secondary">
+                            {data.studentScore} poin
+                          </Badge>
+                          <button
+                            onClick={() => handleEditClick(index)}
+                            className="text-sm text-blue-500"
+                          >
+                            Edit
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
               <CardTitle className="capitalize pt-2">
