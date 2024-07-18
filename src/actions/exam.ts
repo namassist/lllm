@@ -150,6 +150,14 @@ export const getExamAttempt = async (id?: string) => {
           ? "essay"
           : "unknown";
 
+        const studentScore = mcAnswer
+          ? mcAnswer.choice_id === correctChoice?.id
+            ? question.score
+            : 0
+          : essayAnswer
+          ? essayAnswer.score
+          : 0;
+
         return {
           answerId: mcAnswer
             ? mcAnswer.id
@@ -168,13 +176,7 @@ export const getExamAttempt = async (id?: string) => {
             : essayAnswer
             ? essayAnswer.answer
             : "No Answer",
-          studentScore: mcAnswer
-            ? mcAnswer.choice_id === correctChoice?.id
-              ? question.score
-              : 0
-            : essayAnswer
-            ? essayAnswer.score
-            : 0,
+          studentScore: studentScore,
         };
       });
 
@@ -185,6 +187,11 @@ export const getExamAttempt = async (id?: string) => {
       const totalQuestionsAnswered = questionsWithAnswers.filter(
         (q) => q.studentAnswer !== "No Answer"
       ).length;
+
+      const totalScore = questionsWithAnswers.reduce(
+        (total, q) => total + q.studentScore,
+        0
+      );
 
       return {
         attemptId: attempt.id,
@@ -197,7 +204,7 @@ export const getExamAttempt = async (id?: string) => {
         advantage: attempt.advantage,
         disadvantage: attempt.disadvantage,
         examName: attempt.exam.name,
-        score: attempt.score,
+        score: totalScore,
         createdAt: attempt.createdAt,
         totalPossiblePoints,
         totalQuestionsAnswered,

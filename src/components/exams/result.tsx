@@ -14,6 +14,7 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
   const [editingScores, setEditingScores] = React.useState(
     examAttempt.questionsWithAnswers.map(() => false)
   );
+
   const [editedScores, setEditedScores] = React.useState(
     examAttempt.questionsWithAnswers.map((q: any) => q.studentScore)
   );
@@ -166,6 +167,9 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
                   )}
                 </CardTitle>
                 <div className="flex gap-2">
+                  {data.questionType === "multiple choice" && (
+                    <Badge variant="secondary">{data.studentScore} poin</Badge>
+                  )}
                   {data.questionType !== "multiple choice" && (
                     <>
                       {editingScores[index] ? (
@@ -174,7 +178,7 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
                             type="number"
                             value={editedScores[index]}
                             onChange={(e) => handleScoreChange(index, e)}
-                            max={data.questionScore} // Set the max value here
+                            max={data.questionScore}
                             className="text-sm text-center"
                           />
                           <button
@@ -187,14 +191,16 @@ export default function ResultExam({ examAttempt }: { examAttempt: any }) {
                       ) : (
                         <>
                           <Badge variant="secondary">
-                            {data.studentScore} poin
+                            {data.studentScore} poin {examAttempt}
                           </Badge>
-                          <button
-                            onClick={() => handleEditClick(index)}
-                            className="text-sm text-blue-500"
-                          >
-                            Edit
-                          </button>
+                          {examAttempt?.status === "draft" && (
+                            <button
+                              onClick={() => handleEditClick(index)}
+                              className="text-sm text-blue-500"
+                            >
+                              Edit
+                            </button>
+                          )}
                         </>
                       )}
                     </>

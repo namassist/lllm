@@ -27,7 +27,7 @@ export default async function Page({
         </h1>
         <FilterExplore />
       </div>
-      <div className="flex gap-4 mb-5">
+      {/* <div className="flex gap-4 mb-5">
         <Button
           variant={"outline"}
           size="sm"
@@ -78,7 +78,7 @@ export default async function Page({
             Teknik Telekomunikasi
           </span>
         </Button>
-      </div>
+      </div> */}
       <div className="w-full flex-col space-y-6">
         <CardCourse data={courses} preview={true} enrollable />
       </div>
