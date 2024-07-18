@@ -48,6 +48,7 @@ import { deleteTopic } from "@/actions/topic";
 import AddExams from "@/components/forms/add-exams";
 import Participants from "./(tabs)/participants";
 import Grades from "./(tabs)/grades";
+import Discussions from "./(tabs)/discussions";
 
 interface TabProps {
   tab: string;
@@ -250,9 +251,70 @@ export default async function Page({ searchParams, params }: PageProps) {
                   </div>
                 </Card>
               ))}
+              <div className="flex fixed bottom-10 right-10">
+                <Button
+                  className="gap-1 rounded-l-2xl rounded-r-none border-r-[1px]"
+                  asChild
+                >
+                  <Link
+                    href={`/admin/courses/${params.courseId}/topics`}
+                    className="cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
+                      Topics
+                    </span>
+                  </Link>
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="rounded-r-2xl rounded-l-none"
+                      size="icon"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 w-32 border-none -ml-24 mt-1">
+                    <AddExams courseId={params.courseId} />
+                  </PopoverContent>
+                </Popover>
+              </div>{" "}
+              <div className="flex fixed bottom-10 right-10">
+                <Button
+                  className="gap-1 rounded-l-2xl rounded-r-none border-r-[1px]"
+                  asChild
+                >
+                  <Link
+                    href={`/admin/courses/${params.courseId}/topics`}
+                    className="cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
+                      Topics
+                    </span>
+                  </Link>
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      className="rounded-r-2xl rounded-l-none"
+                      size="icon"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0 w-32 border-none -ml-24 mt-1">
+                    <AddExams courseId={params.courseId} />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </TabsContent>
             <TabsContent value="discussions">
-              <p>Tab Discussions</p>
+              <Discussions
+                discussion={data?.discussion}
+                courseId={params?.courseId}
+              />
             </TabsContent>
             <TabsContent value="grades">
               <Grades courseId={params?.courseId} />
@@ -292,32 +354,6 @@ export default async function Page({ searchParams, params }: PageProps) {
             </CardContent>
           </Card>
         </div>
-      </div>
-      <div className="flex fixed bottom-10 right-10">
-        <Button
-          className="gap-1 rounded-l-2xl rounded-r-none border-r-[1px]"
-          asChild
-        >
-          <Link
-            href={`/admin/courses/${params.courseId}/topics`}
-            className="cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap font-semibold">
-              Topics
-            </span>
-          </Link>
-        </Button>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button className="rounded-r-2xl rounded-l-none" size="icon">
-              <ChevronUp className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0 w-32 border-none -ml-24 mt-1">
-            <AddExams courseId={params.courseId} />
-          </PopoverContent>
-        </Popover>
       </div>
     </AuthLayout>
   );

@@ -60,7 +60,7 @@ export const deleteCourse = async (id: string) => {
   return { message: "success deleted course" };
 };
 
-export const getStudentCourses = async (studentId: string) => {
+export const getStudentCourses = async (studentId: string, count?: number) => {
   try {
     const studentCourses = await db.student.findUnique({
       where: {
@@ -68,10 +68,12 @@ export const getStudentCourses = async (studentId: string) => {
       },
       include: {
         enrollmentCourse: {
+          take: count,
           include: {
             course: {
               include: {
                 instructor: true,
+                categories: true,
               },
             },
           },

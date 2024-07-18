@@ -1,17 +1,27 @@
 import * as React from "react";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import { getAllCourses } from "@/lib/data";
-
 import FilterExplore from "@/components/filters/explore";
 import CardCourse from "@/components/courses";
 import { Button } from "@/components/ui/button";
 import { Computer, Heater, LaptopMinimal, Router, Zap } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import SearchInput from "@/components/search";
 
-export default async function Page() {
-  const courses = await getAllCourses();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: {
+    query?: string;
+  };
+}) {
+  const query = searchParams?.query || "";
+  const courses = await getAllCourses(query);
 
   return (
     <AuthLayout>
+      <SearchInput />
+      <Separator />
       <div className="flex justify-between items-center mb-5 mt-5">
         <h1 className="text-xl font-semibold md:text-2xl">
           Explore all courses
@@ -71,6 +81,7 @@ export default async function Page() {
         </Button>
       </div>
       <div className="w-full flex-col space-y-6">
+        {courses.length === 0 && <p>No courses found</p>}
         <CardCourse data={courses} preview={true} />
       </div>
     </AuthLayout>

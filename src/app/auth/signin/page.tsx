@@ -1,14 +1,24 @@
 "use client";
 
 import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import toast from "react-hot-toast";
 import {
   Form,
   FormControl,
@@ -23,8 +33,7 @@ const formSchema = z.object({
   password: z.string().min(8),
 });
 
-export default function Login() {
-  const { toast } = useToast();
+export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -57,15 +66,11 @@ export default function Login() {
       });
 
       if (!signInData?.ok) {
-        toast({
-          variant: "destructive",
-          title: `Error ${signInData?.status}`,
-          description: `${signInData?.error}`,
-        });
+        toast.error(`${signInData?.status} ${signInData?.error}`);
         setIsLoading(false);
       }
     } catch (error) {
-      console.log(error.message)
+      console.log(error);
       setIsLoading(false);
     } finally {
       const session = await getSession();
@@ -75,78 +80,108 @@ export default function Login() {
 
       setIsLoading(false);
       if (session) {
-        toast({
-          title: `Berhasil Login!`,
-        });
+        toast.success("Berhasil Login!");
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="relative w-3/12">
-        <div className="w-full p-6 bg-white rounded-lg shadow-lg">
-          <div className="flex justify-center items-center mt-3 mb-8 gap-4">
-            <h1 className="text-xl font-semibold text-gray-500 text-center uppercase">
-              SIGN-IN
-            </h1>
-          </div>
+    <main className="text-foreground/80 relative py-5 flex flex-col items-center md:py-0 md:justify-center md:h-screen h-full">
+      <div className="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      <section className="space-y-5">
+        <Image
+          className="mx-auto"
+          src="./logo.svg"
+          alt="logo google"
+          width="60"
+          height="60"
+        />
+        <Card className="w-full md:w-[450px] border-t-blue-400 border-t-4 shadow-lg">
+          <CardHeader>
+            <CardTitle className="mb-2">
+              <p className="text-sm text-gray-500 mb-4 md:mb-7 font-normal tracking-wide">
+                <Link className="text-blue-600" href="/">
+                  Home
+                </Link>
+                / Login
+              </p>
+              <p></p>Login
+            </CardTitle>
+            <CardDescription>Input your username and password.</CardDescription>
+          </CardHeader>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="w-full space-y-4"
             >
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="text-xs"
-                        placeholder="Masukkan username"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <CardContent className="space-y-7 md:mt-3">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">
+                        Username atau Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-xs"
+                          placeholder="Masukkan username atau email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          className="text-xs"
+                          placeholder="Masukkan password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter className="space-y-3">
+                {isLoading ? (
+                  <Button className="w-full" size="sm" disabled>
+                    Submitting...
+                  </Button>
+                ) : (
+                  <Button type="submit" size="sm" className="w-full">
+                    Login
+                  </Button>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-xs">Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        className="text-xs"
-                        placeholder="Masukkan password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {isLoading ? (
-                <Button className="w-full" size="sm" disabled>
-                  Segera datang
-                </Button>
-              ) : (
-                <Button type="submit" size="sm" className="w-full">
-                  Masuk
-                </Button>
-              )}
+              </CardFooter>
             </form>
           </Form>
-          <p className="text-xs text-gray-500 text-center mt-10 capitalize">
-            &copy;2024 | Build by IMOET
+        </Card>
+        <div className="space-y-10">
+          <p className="text-center text-sm">
+            Dont Have an account?{" "}
+            <Link
+              href="/auth/signup"
+              className="underline capitalize text-blue-600"
+            >
+              create one!
+            </Link>
+          </p>
+          <p className="text-center text-sm">
+            ©2024 lLMS. All rights reserved.
           </p>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

@@ -533,6 +533,70 @@ export const updateScore = async (data: any) => {
   return { message: "score updated" };
 };
 
+export const getUpcomingExams = async (studentId: string) => {
+  try {
+    const today = new Date();
+    const formattedToday = today.toISOString().split("T")[0];
+
+    const upcomingExams = await db.exam.findMany({
+      where: {
+        held_at: {
+          gte: new Date(formattedToday).toISOString(),
+        },
+        course: {
+          enrollmentCourse: {
+            some: {
+              student_id: studentId,
+            },
+          },
+        },
+      },
+      orderBy: {
+        held_at: "asc",
+      },
+      take: 5,
+      include: {
+        course: true,
+      },
+    });
+
+    return upcomingExams;
+  } catch (error) {
+    console.error(error);
+    return { message: "Failed to get upcoming exams" };
+  }
+};
+
+export const getUpcomingExamsInstructor = async (instructorId: string) => {
+  try {
+    const today = new Date();
+    const formattedToday = today.toISOString().split("T")[0];
+
+    const upcomingExams = await db.exam.findMany({
+      where: {
+        held_at: {
+          gte: new Date(formattedToday).toISOString(),
+        },
+        course: {
+          instructor_id: instructorId,
+        },
+      },
+      orderBy: {
+        held_at: "asc",
+      },
+      take: 5,
+      include: {
+        course: true,
+      },
+    });
+
+    return upcomingExams;
+  } catch (error) {
+    console.error(error);
+    return { message: "Failed to get upcoming exams" };
+  }
+};
+
 export const deleteExam = async (id: string) => {
   let result;
 

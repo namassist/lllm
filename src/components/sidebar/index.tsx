@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Book,
-  BookUser,
-  Compass,
-  Home,
-  NotebookText,
-  User,
-} from "lucide-react";
+import { Book, BookUser, Compass, Home, User } from "lucide-react";
 import { SidebarDesktop } from "./desktop";
 import { SidebarItems } from "@/types/sidebar";
 import { useMediaQuery } from "usehooks-ts";
