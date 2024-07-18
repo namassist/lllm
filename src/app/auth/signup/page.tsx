@@ -77,13 +77,6 @@ export default function Page() {
     <main className="text-foreground/80 relative py-5 flex flex-col items-center md:py-0 md:justify-center md:h-screen h-full">
       <div className="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
       <section className="space-y-5">
-        <Image
-          className="mx-auto"
-          src="./logo.svg"
-          alt="logo google"
-          width="60"
-          height="60"
-        />
         <Card className="w-full md:w-[570px] border-t-blue-400 border-t-4 shadow-lg">
           <CardHeader>
             <CardTitle className="mb-2">

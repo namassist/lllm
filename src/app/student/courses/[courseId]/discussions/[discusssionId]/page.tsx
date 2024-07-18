@@ -23,7 +23,7 @@ export default async function Page({ params }: { params: any }) {
 
   if (discussions) {
     return (
-      <AuthLayout>
+      <AuthLayout isStudent>
         <Card className="text-foreground/80 border-none shadow-none bg-transparent mt-5">
           <CardHeader className="space-y-4">
             <div className="flex gap-2 items-center justify-between">

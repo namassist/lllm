@@ -19,6 +19,7 @@ import { usePathname } from "next/navigation";
 
 interface SidebarDesktopProps {
   sidebarItems: SidebarItems;
+  session: any;
 }
 
 export function SidebarDesktop(props: SidebarDesktopProps) {
@@ -54,9 +55,9 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
                     <div className="flex gap-2">
                       <Avatar className="h-5 w-5">
                         <AvatarImage src="https://github.com/namassist.png" />
-                        <AvatarFallback>Anam</AvatarFallback>
+                        <AvatarFallback>{props.session?.name}</AvatarFallback>
                       </Avatar>
-                      <span>Anam</span>
+                      <span>{props.session?.name}</span>
                     </div>
                     <MoreHorizontal size={20} />
                   </div>

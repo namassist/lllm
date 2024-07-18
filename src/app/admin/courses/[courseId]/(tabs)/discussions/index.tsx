@@ -13,9 +13,11 @@ import React, { useMemo } from "react";
 export default async function Discussions({
   courseId,
   discussion,
+  type = "instructor",
 }: {
   courseId: string;
   discussion: any;
+  type?: string;
 }) {
   return (
     <>
@@ -34,7 +36,9 @@ export default async function Discussions({
       </Sheet>
       {discussion.map((diss: any) => (
         <Link
-          href={`/admin/courses/${courseId}/discussions/${diss.id}`}
+          href={`${
+            type === "instructor" ? "/admin" : "/student"
+          }/courses/${courseId}/discussions/${diss.id}`}
           key={diss.id}
         >
           <Card className="text-foreground/80 hover:bg-foreground/5 duration-150 transition-all mb-5">
@@ -45,7 +49,11 @@ export default async function Discussions({
                     <AvatarImage src="https://github.com/vampirepapi.png" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
-                  <p className="capitalize">John Doe</p>
+                  <p className="capitalize">
+                    {diss?.users?.students?.fullname
+                      ? diss?.users?.students?.fullname
+                      : diss?.users?.instructors?.fullname}
+                  </p>
                   <p className="w-1 h-1 bg-foreground/80 rounded-full"></p>
                   <p className="capitalize text-foreground/70">
                     {formatDate(diss?.createdAt)}

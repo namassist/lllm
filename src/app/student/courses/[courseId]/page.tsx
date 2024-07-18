@@ -12,13 +12,8 @@ import {
   CardContent,
   CardImage,
 } from "@/components/ui/card";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import { redirect } from "next/navigation";
+import Discussions from "@/app/admin/courses/[courseId]/(tabs)/discussions";
 
 interface TabProps {
   tab: string;
@@ -34,6 +29,11 @@ interface PageProps {
 
 export default async function Page({ searchParams, params }: PageProps) {
   const data = await getCoursesById(params.courseId);
+  let currentTab = searchParams.tab ?? "courses";
+
+  if (currentTab !== "discussions") {
+    currentTab = "courses";
+  }
 
   if (data?.enrollmentCourse.length === 0) {
     redirect("/student/courses");
@@ -42,9 +42,9 @@ export default async function Page({ searchParams, params }: PageProps) {
   return (
     <AuthLayout isStudent>
       <div className="flex gap-4">
-        <div className="w-full lg:w-10/12 space-y-5">
-          <Card>
-            <div className="relative text-gray-100 font-semibold">
+        <div className="w-full space-y-5">
+          <Card className="shadow-none border-none bg-transparent">
+            <div className="relative w-full lg:w-10/12 text-gray-100 font-semibold">
               <CardImage
                 src={data?.image as string}
                 alt={`picture of ${data?.title}`}
@@ -92,75 +92,73 @@ export default async function Page({ searchParams, params }: PageProps) {
               </div>
             </div>
           </Card>
-          <div className="space-y-5">
-            {data?.topics?.map((topic, index) => (
-              <Card key={topic.id} id={topic.id} className="w-full relative">
-                <CardHeader>
-                  <CardTitle>Chapter {index + 1}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Card>
-                    <CardContent className="p-4 flex gap-3 items-center">
-                      <Book className="h-7 w-7" />
-                      <Link
-                        href={`/student/courses/${params.courseId}/topics/${topic.id}`}
-                        className="hover:opacity-50 cursor-pointer"
-                      >
-                        <p>{topic.title}</p>
-                      </Link>
+          <Tabs defaultValue={currentTab} className="space-y-5">
+            <TabsList className="w-full lg:w-4/12 grid grid-cols-2">
+              <TabsTrigger value="courses" asChild>
+                <Link href={{ query: { tab: "courses" } }}>Courses</Link>
+              </TabsTrigger>
+              <TabsTrigger value="discussions" asChild>
+                <Link href={{ query: { tab: "discussions" } }}>
+                  Discussions
+                </Link>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="courses" className="space-y-5 w-10/12">
+              <div className="space-y-5">
+                {data?.topics?.map((topic, index) => (
+                  <Card
+                    key={topic.id}
+                    id={topic.id}
+                    className="w-full relative"
+                  >
+                    <CardHeader>
+                      <CardTitle>Chapter {index + 1}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Card>
+                        <CardContent className="p-4 flex gap-3 items-center">
+                          <Book className="h-7 w-7" />
+                          <Link
+                            href={`/student/courses/${params.courseId}/topics/${topic.id}`}
+                            className="hover:opacity-50 cursor-pointer"
+                          >
+                            <p>{topic.title}</p>
+                          </Link>
+                        </CardContent>
+                      </Card>
                     </CardContent>
                   </Card>
-                </CardContent>
-              </Card>
-            ))}
-            {data?.exam?.map((exam) => (
-              <Card key={exam.id} className="w-full relative">
-                <CardHeader>
-                  <CardTitle>{exam.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Card>
-                    <CardContent className="p-4">
-                      <Link
-                        href={`/student/courses/${params.courseId}/exams/${exam.id}`}
-                        className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
-                      >
-                        <BookUser className="h-7 w-7" />
-                        <p>{exam.name}</p>
-                      </Link>
+                ))}
+                {data?.exam?.map((exam) => (
+                  <Card key={exam.id} className="w-full relative">
+                    <CardHeader>
+                      <CardTitle>{exam.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Card>
+                        <CardContent className="p-4">
+                          <Link
+                            href={`/student/courses/${params.courseId}/exams/${exam.id}`}
+                            className="flex gap-3 items-center hover:opacity-50 cursor-pointer"
+                          >
+                            <BookUser className="h-7 w-7" />
+                            <p>{exam.name}</p>
+                          </Link>
+                        </CardContent>
+                      </Card>
                     </CardContent>
                   </Card>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-        <div className="w-full lg:w-2/12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Materials Course</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <NavigationMenu>
-                <NavigationMenuList>
-                  {data?.topics?.map((topic) => (
-                    <NavigationMenuItem key={topic.id}>
-                      <Link
-                        href={`#${topic.id}`}
-                        legacyBehavior
-                        passHref
-                        className="w-full "
-                      >
-                        <NavigationMenuLink className="hover:opacity-60 text-sm">
-                          {topic?.title}
-                        </NavigationMenuLink>
-                      </Link>
-                    </NavigationMenuItem>
-                  ))}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="discussions" className="space-y-5">
+              <Discussions
+                type="student"
+                discussion={data?.discussion}
+                courseId={params?.courseId}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </AuthLayout>

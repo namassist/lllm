@@ -43,8 +43,15 @@ export const getCoursesById = async (id: string) => {
         },
         exam: true,
         discussion: {
+          orderBy: { createdAt: "desc" },
           include: {
             reply: true,
+            users: {
+              include: {
+                students: true,
+                instructors: true,
+              },
+            },
           },
         },
         enrollmentCourse: {
